@@ -42,3 +42,8 @@ neoForge {
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+dependencies {
+    implementation project(":sepple")
+    jarJar project(":sepple")
+}

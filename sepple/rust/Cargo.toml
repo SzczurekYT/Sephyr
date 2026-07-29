@@ -1,0 +1,11 @@
+[package]
+name = "sepple-java"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+j4rs = "0.25.2"
+j4rs_derive = "0.1.1"

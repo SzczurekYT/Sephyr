@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+}
+
+jar {
+    from('../../sepple/rust/target/debug/libsepple_java.so') {
+        into 'natives/'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "io.github.astonbitecode:j4rs:${project.j4rs_version}"
+}

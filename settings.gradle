@@ -48,3 +48,6 @@ rootProject.name = 'Sephyr'
 include('common')
 include('fabric')
 include('neoforge')
+
+include('sepple')
+project(':sepple').projectDir = file('sepple/java')
