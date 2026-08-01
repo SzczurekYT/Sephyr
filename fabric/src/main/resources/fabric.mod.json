@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "yt.szczurek.sephyr.Sephyr"
+      "yt.szczurek.sephyr.SephyrMod"
     ]
   },
   "mixins": [

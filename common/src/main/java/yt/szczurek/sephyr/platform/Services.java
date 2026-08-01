@@ -1,6 +1,6 @@
 package yt.szczurek.sephyr.platform;
 
-import yt.szczurek.sephyr.Constants;
+import yt.szczurek.sephyr.Sephyr;
 import yt.szczurek.sephyr.platform.services.IPlatformHelper;
 
 import java.util.ServiceLoader;
@@ -21,7 +21,7 @@ public class Services {
     // example our file on Forge points to ForgePlatformHelper while Fabric points to FabricPlatformHelper.
     public static <T> T load(Class<T> clazz) {
         final T loadedService = ServiceLoader.load(clazz).findFirst().orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
-        Constants.LOG.debug("Loaded {} for service {}", loadedService, clazz);
+        Sephyr.LOG.debug("Loaded {} for service {}", loadedService, clazz);
         return loadedService;
     }
 }
