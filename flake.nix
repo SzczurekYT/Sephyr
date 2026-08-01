@@ -23,8 +23,9 @@
             # Minecraft deps
             libGL
             glfw3-minecraft
+            flite # So there is no long lib not found error
+            libx11 # Otherwise GLFW init fails with no platform found error
             libpulseaudio
-            java
         ];
       in
       with pkgs;
@@ -32,14 +33,9 @@
         devShells.default = mkShell {
           inherit buildInputs;
           packages = [
+            java
             rust-bin.stable.latest.default
             jetbrains.idea-oss
-            # gradle_8
-            # python314
-            # uv
-            # pkg-config
-            # portaudio
-            # alsa-lib
           ];
           env = {
             LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;
