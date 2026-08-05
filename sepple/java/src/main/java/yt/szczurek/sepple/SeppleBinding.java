@@ -1,7 +1,6 @@
 package yt.szczurek.sepple;
 
 import org.astonbitecode.j4rs.api.Instance;
-import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,9 +8,11 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 public class SeppleBinding {
-    private static native Instance<String> fnnoargs();
+    protected static native void run(Instance<String> path, Instance<List<String>> dictionary, Instance<WordCallback> callback);
+    protected static native Instance<Boolean> isRunning();
 
     static {
         try {
@@ -35,11 +36,5 @@ public class SeppleBinding {
         inputStream.close();
 
         System.load(targetFile.toAbsolutePath().toString());
-    }
-
-    public static String doCallNoArgs() {
-
-        var inst = fnnoargs();
-        return Java2RustUtils.getObjectCasted(inst);
     }
 }

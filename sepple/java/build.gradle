@@ -7,7 +7,7 @@ java {
 }
 
 jar {
-    from('../../sepple/rust/target/debug/libsepple_java.so') {
+    from('../../sepple/rust/target/release/libsepple_java.so') {
         into 'natives/'
     }
 }

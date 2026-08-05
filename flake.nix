@@ -20,12 +20,15 @@
         };
         java = pkgs.temurin-bin-21;
         buildInputs = with pkgs; [
-            # Minecraft deps
-            libGL
-            glfw3-minecraft
-            flite # So there is no long lib not found error
-            libx11 # Otherwise GLFW init fails with no platform found error
-            libpulseaudio
+          # Minecraft deps
+          libGL
+          glfw3-minecraft
+          flite # So there is no long lib not found error
+          libx11 # Otherwise GLFW init fails with no platform found error
+          libpulseaudio
+          # Sepple deps
+          alsa-lib
+          openssl
         ];
       in
       with pkgs;
@@ -36,6 +39,8 @@
             java
             rust-bin.stable.latest.default
             jetbrains.idea-oss
+            # Needed by Sepple
+            pkg-config
           ];
           env = {
             LD_LIBRARY_PATH = lib.makeLibraryPath buildInputs;

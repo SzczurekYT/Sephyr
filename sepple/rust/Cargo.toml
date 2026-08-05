@@ -9,3 +9,5 @@ crate-type = ["cdylib"]
 [dependencies]
 j4rs = "0.25.2"
 j4rs_derive = "0.1.1"
+sepple = { git = "https://github.com/SzczurekYT/Sepple", version = "0.1.0" }
+tokio = "1.53.1"
