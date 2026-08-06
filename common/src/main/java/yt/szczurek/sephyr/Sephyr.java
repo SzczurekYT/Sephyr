@@ -13,7 +13,10 @@ public class Sephyr {
     public static final String MOD_ID = "sephyr";
     public static final String MOD_NAME = "Sephyr";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
-    public static final List<String> DICTIONARY = List.of("prizim", "fɛra", "kɛjfida", "ɛvi", "jɑːkɾidɔ", "vɛɾtɛɾ", "toŋk", "ʔalɪˈvɑn", "ibaŋk");
+    public static final List<String> DICTIONARY = List.of(
+            "fɛra", "kɛjfida", "ɛvi", "wˈanga", "ɛkɐsuɾɯ", "jɑːkɾidɔ", "vɛɾtɛɾ", "ˈɔnːdˌɔː", "ãntikɔ",
+            "fɒksɑm", "ˈunvaksɒm", "lirɔ", "vəˈluɡoː", "plɒka", "toŋk", "ʔalɪˈvɑn", "ibaŋk", "prizim"
+    );
 
     public static void init() {
         Thread seppleThread = new Thread(() -> Sepple.run("/disks/wizard/dev/Python/Projekty/AI/Sepple/model/multipa_sim.bpk", DICTIONARY, Sephyr::magicWordReceiver));
