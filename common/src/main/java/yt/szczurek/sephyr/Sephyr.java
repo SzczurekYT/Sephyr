@@ -19,8 +19,24 @@ public class Sephyr {
     );
 
     public static void init() {
-        Thread seppleThread = new Thread(() -> Sepple.run("/disks/wizard/dev/Python/Projekty/AI/Sepple/model/multipa_sim.bpk", DICTIONARY, Sephyr::magicWordReceiver));
+        // We do the init off thread, so we don't slow down game start
+        Thread initThread = new Thread(() -> Sepple.init("/disks/wizard/dev/Python/Projekty/AI/Sepple/model/multipa_sim.bpk", DICTIONARY));
+        initThread.start();
+    }
+
+    public static void startSepple() {
+        if (Sepple.isRunning()) {
+            return;
+        }
+
+        Thread seppleThread = new Thread(() -> Sepple.run(Sephyr::magicWordReceiver));
         seppleThread.start();
+    }
+
+    public static void stopSepple() {
+        if (Sepple.isRunning()) {
+            Sepple.stop();
+        }
     }
 
     public static void magicWordReceiver(String word) {

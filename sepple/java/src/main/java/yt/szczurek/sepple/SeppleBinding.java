@@ -11,7 +11,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class SeppleBinding {
-    protected static native void run(Instance<String> path, Instance<List<String>> dictionary, Instance<WordCallback> callback);
+    protected static native void init(Instance<String> path, Instance<List<String>> dictionary);
+    protected static native void run(Instance<WordCallback> callback);
+    protected static native void stop();
     protected static native Instance<Boolean> isRunning();
 
     static {

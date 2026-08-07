@@ -1,4 +1,4 @@
-use std::{thread::JoinHandle, time::Duration};
+use std::{sync::atomic::Ordering, time::Duration};
 
 use j4rs::{Instance, InvocationArg, Jvm};
 use sepple::{
@@ -17,11 +17,15 @@ use sepple::{
     },
     vad,
 };
-use tokio::sync::mpsc::Receiver;
+use tokio::{
+    runtime::{self},
+    time::timeout,
+};
+
+use crate::jni::SHOULD_STOP;
 
 pub struct Sepple {
-    handles: Vec<JoinHandle<()>>,
-    receiver: Receiver<String>,
+    pipeline: Pipeline<String>,
 }
 
 impl Sepple {
@@ -35,7 +39,7 @@ impl Sepple {
         let ipa_processor = IpaProcessor::init(model_path, &sliding_window_config);
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
-        let (receiver, handles) = Pipeline::new(AudioCapture)
+        let pipeline = Pipeline::new(AudioCapture)
             .then(AudioChunker::new(vad::CHUNK_SIZE))
             .then(vad_scorer)
             .then(VadFilter::new(0.35, 0.35, 10))
@@ -44,29 +48,44 @@ impl Sepple {
                 &Duration::from_millis(40),
             ))
             .then(ipa_processor)
-            .then(word_detector)
-            .build_no_consumer();
+            .then(word_detector);
 
-        Sepple { handles, receiver }
+        Sepple { pipeline }
     }
 
-    pub fn run_word_transfer(mut self, callback: &Instance) {
-        let jvm = Jvm::attach_thread().unwrap();
+    pub fn run(self, jvm: &Jvm, callback: &Instance) {
+        let (mut receiver, handle) = self.pipeline.build_no_consumer();
 
-        while let Some(word) = self.receiver.blocking_recv() {
-            let arg = InvocationArg::try_from(word)
-                .map_err(|error| format!("{}", error))
-                .unwrap();
+        let rt = runtime::Builder::new_current_thread()
+            .enable_time()
+            .build()
+            .unwrap();
 
-            jvm.invoke(callback, "accept", &[&arg]).unwrap();
-        }
+        let future = async {
+            loop {
+                match timeout(Duration::from_millis(250), receiver.recv()).await {
+                    Ok(Some(word)) => {
+                        let arg = InvocationArg::try_from(word)
+                            .map_err(|error| format!("{}", error))
+                            .unwrap();
 
-        self.handles
-            .into_iter()
-            .for_each(|join| join.join().unwrap());
-    }
+                        jvm.invoke(callback, "accept", &[&arg]).unwrap();
+                    }
+                    Ok(None) => break,
+                    Err(_) => {
+                        if SHOULD_STOP
+                            .compare_exchange(true, false, Ordering::SeqCst, Ordering::SeqCst)
+                            .is_ok()
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+        };
 
-    pub fn is_running(&self) -> bool {
-        false
+        rt.block_on(future);
+
+        handle.cancel();
     }
 }

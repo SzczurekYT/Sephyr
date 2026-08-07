@@ -9,8 +9,16 @@ import java.util.function.Consumer;
 
 public class Sepple {
 
-    public static void run(String modelPath, List<String> dictionary, Consumer<String> callback) {
-        SeppleBinding.run(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary), Java2RustUtils.createInstance(new WordCallback(callback)));
+    public static void init(String modelPath, List<String> dictionary) {
+        SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary));
+    }
+
+    public static void run(Consumer<String> callback) {
+        SeppleBinding.run(Java2RustUtils.createInstance(new WordCallback(callback)));
+    }
+
+    public static void stop() {
+        SeppleBinding.stop();
     }
 
     public static boolean isRunning() {

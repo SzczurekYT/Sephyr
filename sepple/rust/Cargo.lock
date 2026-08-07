@@ -4562,7 +4562,7 @@ dependencies = [
 [[package]]
 name = "multipa-model"
 version = "0.1.0"
-source = "git+https://github.com/SzczurekYT/Sepple#3e5dc13a4a85f4337445a1c7129ea72b00123505"
+source = "git+https://github.com/SzczurekYT/Sepple#d39ac3a2d5685db8d360dab085da016191528b89"
 dependencies = [
  "burn",
  "burn-store",
@@ -6474,7 +6474,7 @@ checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
 [[package]]
 name = "sepple"
 version = "0.1.0"
-source = "git+https://github.com/SzczurekYT/Sepple#3e5dc13a4a85f4337445a1c7129ea72b00123505"
+source = "git+https://github.com/SzczurekYT/Sepple#d39ac3a2d5685db8d360dab085da016191528b89"
 dependencies = [
  "bunsen",
  "burn",
