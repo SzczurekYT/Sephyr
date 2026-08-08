@@ -25,4 +25,8 @@ public class Sepple {
         Instance<Boolean> result = SeppleBinding.isRunning();
         return Java2RustUtils.getObjectCasted(result);
     }
+
+    public static void setupLogging(Consumer<String> callback) {
+        SeppleBinding.setupLogging(Java2RustUtils.createInstance(new WordCallback(callback)));
+    }
 }

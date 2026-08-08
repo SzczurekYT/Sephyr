@@ -15,6 +15,7 @@ public class SeppleBinding {
     protected static native void run(Instance<WordCallback> callback);
     protected static native void stop();
     protected static native Instance<Boolean> isRunning();
+    protected static native void setupLogging(Instance<WordCallback> callback);
 
     static {
         try {

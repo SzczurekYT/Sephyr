@@ -1,6 +1,5 @@
 use std::{sync::atomic::Ordering, time::Duration};
 
-use j4rs::{Instance, InvocationArg, Jvm};
 use sepple::{
     dictionary::Dictionary,
     pipeline::{
@@ -22,7 +21,7 @@ use tokio::{
     time::timeout,
 };
 
-use crate::jni::SHOULD_STOP;
+use crate::jni::{SHOULD_STOP, WordConsumer};
 
 pub struct Sepple {
     pipeline: Pipeline<String>,
@@ -53,7 +52,7 @@ impl Sepple {
         Sepple { pipeline }
     }
 
-    pub fn run(self, jvm: &Jvm, callback: &Instance) {
+    pub fn run(self, callback: &WordConsumer) {
         let (mut receiver, handle) = self.pipeline.build_no_consumer();
 
         let rt = runtime::Builder::new_current_thread()
@@ -64,13 +63,7 @@ impl Sepple {
         let future = async {
             loop {
                 match timeout(Duration::from_millis(250), receiver.recv()).await {
-                    Ok(Some(word)) => {
-                        let arg = InvocationArg::try_from(word)
-                            .map_err(|error| format!("{}", error))
-                            .unwrap();
-
-                        jvm.invoke(callback, "accept", &[&arg]).unwrap();
-                    }
+                    Ok(Some(word)) => callback.accept(&word),
                     Ok(None) => break,
                     Err(_) => {
                         if SHOULD_STOP

@@ -19,6 +19,9 @@ public class Sephyr {
     );
 
     public static void init() {
+        Sepple.setupLogging(message -> {
+            LOG.info("(Sepple/Rust) {}", message);
+        });
         // We do the init off thread, so we don't slow down game start
         Thread initThread = new Thread(() -> Sepple.init("/disks/wizard/dev/Python/Projekty/AI/Sepple/model/multipa_sim.bpk", DICTIONARY));
         initThread.start();
