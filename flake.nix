@@ -18,7 +18,7 @@
         pkgs = import nixpkgs {
           inherit system overlays;
         };
-        java = pkgs.temurin-bin-21;
+        java = pkgs.temurin-bin-25;
         buildInputs = with pkgs; [
           # Minecraft deps
           libGL
