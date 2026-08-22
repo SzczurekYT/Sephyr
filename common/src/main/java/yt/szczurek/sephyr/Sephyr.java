@@ -44,6 +44,6 @@ public class Sephyr {
 
     public static void magicWordReceiver(String word) {
         Sephyr.LOG.debug("Received word from Sepple: {}", word);
-        Minecraft.getInstance().gui.getChat().addMessage(Component.literal("Casting: " + word));
+        Minecraft.getInstance().gui.setOverlayMessage(Component.literal("✨ " + word + " ✨"), false);
     }
 }
