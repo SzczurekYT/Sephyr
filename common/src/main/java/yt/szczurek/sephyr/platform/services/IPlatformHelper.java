@@ -1,5 +1,8 @@
 package yt.szczurek.sephyr.platform.services;
 
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+
 public interface IPlatformHelper {
 
     /**
@@ -17,7 +20,7 @@ public interface IPlatformHelper {
      */
     boolean isModLoaded(String modId);
 
-    /**
+    /**void registerResourceListener(Identifier id, SimpleJsonResourceReloadListener<?> listener);
      * Check if the game is currently in a development environment.
      *
      * @return True if in a development environment, false otherwise.
@@ -32,4 +35,6 @@ public interface IPlatformHelper {
     default String getEnvironmentName() {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    void registerServerReloadListener(Identifier id, PreparableReloadListener listener);
 }
