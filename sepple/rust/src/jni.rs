@@ -7,7 +7,7 @@ use std::{
     time::Instant,
 };
 
-use j4rs::{InvocationArg, prelude::*};
+use j4rs::{InvocationArg, errors::J4RsError, prelude::*};
 use j4rs_derive::*;
 
 use crate::sepple::Sepple;
@@ -17,6 +17,16 @@ static SEPPLE: (Mutex<Option<Sepple>>, Condvar) = (Mutex::new(None), Condvar::ne
 static IS_RUNNING: AtomicBool = AtomicBool::new(false);
 pub(crate) static SHOULD_STOP: AtomicBool = AtomicBool::new(false);
 
+pub fn print_error(error: &J4RsError, context: &str) {
+    let string = "[Sephyr/Sepple]: An error occured.\n".to_owned()
+        + "If you see this, please open an issue in the Sephyr mod.\n"
+        + "The error happened while "
+        + context
+        + "\nError:\n"
+        + &error.to_string();
+    println!("{string}");
+}
+
 pub struct WordConsumer {
     instance: Instance,
 }
@@ -25,11 +35,18 @@ impl WordConsumer {
     pub fn accept(&self, string: &str) {
         let jvm = Jvm::attach_thread().unwrap();
 
-        let arg = InvocationArg::try_from(string)
-            .map_err(|error| format!("{}", error))
-            .unwrap();
+        let arg = match InvocationArg::try_from(string) {
+            Ok(arg) => arg,
+            Err(err) => {
+                print_error(&err, "creating word consumer callback arg");
+                return;
+            }
+        };
 
-        jvm.invoke(&self.instance, "accept", &[&arg]).unwrap();
+        let result = jvm.invoke(&self.instance, "accept", &[&arg]);
+        if let Err(err) = result {
+            print_error(&err, "calling word consumer callback");
+        }
     }
 }
 
