@@ -17,6 +17,9 @@
   "entrypoints": {
     "main": [
       "yt.szczurek.sephyr.SephyrMod"
+    ],
+    "client": [
+      "yt.szczurek.sephyr.SephyrClientMod"
     ]
   },
   "mixins": [
