@@ -4,6 +4,7 @@ use std::{
         Condvar, Mutex,
         atomic::{AtomicBool, Ordering},
     },
+    thread::{self, Thread},
     time::Instant,
 };
 
@@ -75,6 +76,12 @@ fn init(path: Instance, dictionary: Instance) {
     let dictionary: Vec<String> = jvm.to_rust(dictionary).unwrap();
 
     log("Initializing sepple");
+    let thread = thread::current();
+    let thread_name = thread
+        .name()
+        .map(str::to_string)
+        .unwrap_or_else(|| format!("unnamed thread of id: {:?}", thread.id()));
+    log(&format!("On {thread_name}",));
     let load_start = Instant::now();
     let sepple = Sepple::init(&path, dictionary);
 
@@ -87,6 +94,12 @@ fn init(path: Instance, dictionary: Instance) {
 
 #[call_from_java("yt.szczurek.sepple.SeppleBinding.run")]
 fn run(callback: Instance) {
+    let thread = thread::current();
+    let thread_name = thread
+        .name()
+        .map(str::to_string)
+        .unwrap_or_else(|| format!("unnamed thread of id: {:?}", thread.id()));
+    log(&format!("Starting sepple. {thread_name}",));
     let mut sepple_guard = SEPPLE.0.lock().unwrap();
     while sepple_guard.is_none() {
         sepple_guard = SEPPLE.1.wait(sepple_guard).unwrap();

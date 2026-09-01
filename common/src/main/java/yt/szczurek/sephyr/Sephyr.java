@@ -1,14 +1,15 @@
 package yt.szczurek.sephyr;
 
+import com.mojang.authlib.minecraft.client.MinecraftClient;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yt.szczurek.sephyr.spells.SpellCastingManager;
-import yt.szczurek.sephyr.spells.SpellElement;
-import yt.szczurek.sephyr.spells.SpellsRegistry;
-import yt.szczurek.sephyr.spells.SimpleRegistry;
+import yt.szczurek.sephyr.spells.*;
 import yt.szczurek.sepple.Sepple;
 
 import java.util.List;
@@ -23,15 +24,19 @@ public class Sephyr {
             "fɒksɑm", "ˈunvaksɒm", "lirɔ", "vəˈluɡoː", "plɒka", "toŋk", "ʔalɪˈvɑn", "ibaŋk", "prizim"
     );
     public static final SpellCastingManager SPELL_CASTING_MANAGER = new SpellCastingManager();
-    public static SimpleRegistry<SpellElement> SPELL_ELEMENTS = new SimpleRegistry<>("spell_element", SpellElement.CODEC);
+    private static final int STAR_COLOR = 16773205; // 0xfff055
+//    public static SimpleRegistry<SpellElement> SPELL_ELEMENTS = new SimpleRegistry<>("spell_element", SpellElement.DIRECT_CODEC);
+
+
 
     public static Identifier identifier(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static void init() {
-        SPELL_ELEMENTS.register();
-        SpellsRegistry.registerSpells();
+        //  SPELL_ELEMENTS.register();
+        SpellEffectRegistry.registerEffects();
+        SpellRegistry.registerSpells();
     }
 
     public static void clientInit() {
@@ -59,10 +64,24 @@ public class Sephyr {
     }
 
     public static void magicWordReceiver(String word) {
-        Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("fire").withColor(SPELL_ELEMENTS.get(Sephyr.identifier("fire")).get().color()));
-        Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("wind").withColor(SPELL_ELEMENTS.get(Sephyr.identifier("wind")).get().color()));
+        var registry = Minecraft.getInstance().level.registryAccess().lookup(SephyrRegistries.SPELL_ELEMENT).get();
+        try {
+            var fire = registry.getValue(identifier("fire"));
+            var air = registry.getValue(identifier("wind"));
+
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("fire color").withColor(fire.color()));
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("wind color").withColor(air.color()));
+        } catch (Exception e) {
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("no worky\n" + e));
+        }
+
         Sephyr.LOG.debug("Received word from Sepple: {}", word);
-        Minecraft.getInstance().gui.setOverlayMessage(Component.literal("✨ " + word + " ✨"), false);
+        var spellComponent = Component.literal(word);
+        var element = registry.stream().filter(e -> e.word().equals(word)).findFirst();
+        spellComponent.withColor(element.map(SpellElement::color).orElse(0xFFFFFF));
+        var component = Component.literal("✨ ").withColor(STAR_COLOR)
+                .append(spellComponent).append(Component.literal(" ✨").withColor(STAR_COLOR));
+        Minecraft.getInstance().gui.setOverlayMessage(component, false);
         SPELL_CASTING_MANAGER.addWord(word);
     }
 }
