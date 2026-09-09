@@ -10,7 +10,7 @@ import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import oshi.util.tuples.Pair;
 import yt.szczurek.sephyr.platform.NeoForgePlatformHelper;
-import yt.szczurek.sephyr.spells.Spell;
+import yt.szczurek.sephyr.spells.SpellDefinition;
 import yt.szczurek.sephyr.spells.SpellElement;
 
 @Mod(Sephyr.MOD_ID)
@@ -38,8 +38,8 @@ public class SephyrMod {
         );
         event.dataPackRegistry(
                 SephyrRegistries.SPELL,
-                Spell.DIRECT_CODEC,
-                Spell.DIRECT_CODEC,
+                SpellDefinition.DIRECT_CODEC,
+                SpellDefinition.DIRECT_CODEC,
                 builder -> builder.sync(true)
         );
     }

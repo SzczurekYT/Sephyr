@@ -8,13 +8,13 @@ import java.util.HashMap;
 
 public class SpellEffectRegistry {
     private static final SpellEffectRegistry instance = new SpellEffectRegistry();
-    private final HashMap<Identifier, SpellEffect> effects = new HashMap<>();
+    private final HashMap<Identifier, Spell> effects = new HashMap<>();
 
-    public void register(Identifier id, SpellEffect effect) {
+    public void register(Identifier id, Spell effect) {
         effects.put(id, effect);
     }
 
-    public SpellEffect getEffect(Identifier id) {
+    public Spell getEffect(Identifier id) {
         return effects.get(id);
     }
 
@@ -24,6 +24,6 @@ public class SpellEffectRegistry {
 
     public static void registerEffects() {
         SpellEffectRegistry registry = get();
-        registry.register(Sephyr.identifier("wind_leap"), new WindLeapEffect(Sephyr.identifier("wind_leap")));
+        registry.register(Sephyr.identifier("wind_leap"), new WindLeapEffect());
     }
 }

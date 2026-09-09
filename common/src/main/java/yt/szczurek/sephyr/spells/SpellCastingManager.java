@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class SpellCastingManager {
     private final List<String> wipSpell = new ArrayList<>();
-    private Set<Spell> wipSpellCache = new HashSet<>();
+    private Set<SpellDefinition> wipSpellCache = new HashSet<>();
 
     public void addWord(String word) {
         if (wipSpell.isEmpty()) {
@@ -45,28 +45,28 @@ public class SpellCastingManager {
         Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal(message));
     }
 
-    public Set<Spell> getCandidates(String word) {
-        HashSet<Spell> candidates = new HashSet<>();
+    public Set<SpellDefinition> getCandidates(String word) {
+        HashSet<SpellDefinition> candidates = new HashSet<>();
         if (Minecraft.getInstance().level == null) {
             return candidates;
         }
-        Registry<Spell> registry = Minecraft.getInstance().level.registryAccess().lookupOrThrow(SephyrRegistries.SPELL);
-        for (Spell spell : registry) {
-            if (spell.element().value().word().equals(word)) {
-                candidates.add(spell);
+        Registry<SpellDefinition> registry = Minecraft.getInstance().level.registryAccess().lookupOrThrow(SephyrRegistries.SPELL);
+        for (SpellDefinition spellDefinition : registry) {
+            if (spellDefinition.element().value().word().equals(word)) {
+                candidates.add(spellDefinition);
             }
         }
         return candidates;
     }
 
-    public Set<Spell> filterCandidates(String word, int offset, Set<Spell> currentCandidates) {
+    public Set<SpellDefinition> filterCandidates(String word, int offset, Set<SpellDefinition> currentCandidates) {
         Set<SpellSequence> result = new HashSet<>();
 
-        for (Spell spell : currentCandidates) {
+        for (SpellDefinition spellDefinition : currentCandidates) {
             try {
-                String spellWord = spell.text().words().get(offset);
+                String spellWord = spellDefinition.text().words().get(offset);
                 if (spellWord.equals(word)) {
-                    result.add(spell);
+                    result.add(spellDefinition);
                 }
             } catch (IndexOutOfBoundsException ignored) {
             }

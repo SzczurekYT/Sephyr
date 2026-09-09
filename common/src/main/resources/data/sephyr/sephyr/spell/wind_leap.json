@@ -3,7 +3,5 @@
   "description": "Launch yourself into air",
   "text": "vɛɾtɛɾ ɛvi [ˈonːdˌoː|ãntikɔ|fɒksɑm]",
   "element": "sephyr:wind",
-  "effects": [
-      "sephyr:wind_leap"
-  ]
+  "impl": "sephyr:wind_leap"
 }

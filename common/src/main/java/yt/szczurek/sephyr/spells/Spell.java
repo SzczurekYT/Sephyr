@@ -1,23 +1,32 @@
 package yt.szczurek.sephyr.spells;
 
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.resources.RegistryFixedCodec;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
+import org.jspecify.annotations.Nullable;
 import yt.szczurek.sephyr.SephyrRegistries;
 
 import java.util.List;
 
-public record Spell(String name, String description, SpellSequence text, Holder<SpellElement> element, List<SpellEffect> effects) {
+public abstract class Spell {
+    public static final Codec<Holder<CommandNode<SpellCtx>>> CODEC = RegistryFixedCodec.create(SephyrRegistries.SPELL_IMPL);
 
-    public static final Codec<Spell> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.STRING.fieldOf("name").forGetter(Spell::name),
-                    Codec.STRING.fieldOf("description").forGetter(Spell::description),
-                    SpellSequence.CODEC.fieldOf("text").forGetter(Spell::text),
-                    SpellElement.CODEC.fieldOf("element").forGetter(Spell::element),
-                    SpellEffect.CODEC.listOf().fieldOf("effects").forGetter(Spell::effects)
-            )
-            .apply(instance, Spell::new));
+    private SpellSequence sequence;
+    private List<CommandNode<SpellCtx>> nodes;
 
-    public static final Codec<Holder<Spell>> CODEC = RegistryFileCodec.create(SephyrRegistries.SPELL, DIRECT_CODEC);
+
+    public static LiteralArgumentBuilder<SpellCtx> literal(final String literal) {
+        return LiteralArgumentBuilder.literal(literal);
+    }
+
+    public abstract CommandNode<SpellCtx> buildNode();
+
+    public abstract void execute(SpellSequence sequence, SpellCtx ctx);
 }

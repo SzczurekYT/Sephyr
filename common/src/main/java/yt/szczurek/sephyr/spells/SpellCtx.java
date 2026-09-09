@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public class SpellParameters {
+public class SpellCtx {
     public @NotNull SpellElement element;
     public @NotNull Entity castingEntity;
     public @NotNull Vec3 castPos;
@@ -15,7 +15,7 @@ public class SpellParameters {
     public @Nullable Entity targetEntity;
     public @Nullable BlockPos targetPos;
 
-    public SpellParameters(@NotNull SpellElement element, @NotNull Entity castingEntity, @NotNull Vec3 castPos, @NotNull Vec3 castDirection, @Nullable Entity targetEntity) {
+    public SpellCtx(@NotNull SpellElement element, @NotNull Entity castingEntity, @NotNull Vec3 castPos, @NotNull Vec3 castDirection, @Nullable Entity targetEntity) {
         this.element = element;
         this.castingEntity = castingEntity;
         this.castPos = castPos;
@@ -23,7 +23,7 @@ public class SpellParameters {
         this.targetEntity = targetEntity;
     }
 
-    public SpellParameters(@NotNull SpellElement element, @NotNull Entity castingEntity, @NotNull Vec3 castPos, @NotNull Vec3 castDirection, @Nullable BlockPos targetPos) {
+    public SpellCtx(@NotNull SpellElement element, @NotNull Entity castingEntity, @NotNull Vec3 castPos, @NotNull Vec3 castDirection, @Nullable BlockPos targetPos) {
         this.element = element;
         this.castingEntity = castingEntity;
         this.castPos = castPos;
