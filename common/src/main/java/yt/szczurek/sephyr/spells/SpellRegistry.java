@@ -16,7 +16,7 @@ import static yt.szczurek.sephyr.Sephyr.identifier;
 public class SpellRegistry {
     private static final SpellRegistry instance = new SpellRegistry();
     private final HashMap<SpellSequence, String> spells = new HashMap<>();
-    private final CommandDispatcher<SpellCtx> dispatcher = new CommandDispatcher<>();
+    private static final CommandDispatcher<SpellCtx> dispatcher = new CommandDispatcher<>();
 
     public void register(SpellSequence spell, String name) {
         spells.put(spell, name);
@@ -33,6 +33,7 @@ public class SpellRegistry {
     public static void registerSpells(WritableRegistry<CommandNode<SpellCtx>> registry) {
         SpellRegistry self = get();
         self.register(registry, "wind_leap", new WindLeapEffect());
+//        registry.
     }
 
     private void register(WritableRegistry<CommandNode<SpellCtx>> registry, String name, Spell impl) {

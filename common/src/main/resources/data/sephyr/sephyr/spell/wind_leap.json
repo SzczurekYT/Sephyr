@@ -1,7 +1,6 @@
 {
   "name": "Wind leap",
   "description": "Launch yourself into air",
-  "text": "vɛɾtɛɾ ɛvi [ˈonːdˌoː|ãntikɔ|fɒksɑm]",
   "element": "sephyr:wind",
   "impl": "sephyr:wind_leap"
 }
