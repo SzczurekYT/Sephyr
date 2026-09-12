@@ -1,6 +1,13 @@
 package yt.szczurek.sephyr.spells;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
+
 public class Words {
+    private static final List<String> WORDS = new ArrayList<>();
+
     public static final String SELF = "ɛvi";
     public static final String SHOT = "wˈanga";
     public static final String CHARGE = "ɛkɐsuɾɯ";
@@ -18,20 +25,23 @@ public class Words {
     public static final String FIRE = "ibaŋk";
     public static final String LIGHT = "prizim";
 
+    public static List<String> getList() {
+        if (!WORDS.isEmpty()) {
+            return WORDS;
+        }
 
+        for (Field field : Words.class.getFields()) {
+            if (field.getType() != String.class || !Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
 
+            try {
+                WORDS.add((String) field.get(null));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return WORDS;
+    }
 }

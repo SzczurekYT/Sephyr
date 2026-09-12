@@ -35,6 +35,4 @@ public interface IPlatformHelper {
     default String getEnvironmentName() {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
-
-    void registerServerReloadListener(Identifier id, PreparableReloadListener listener);
 }

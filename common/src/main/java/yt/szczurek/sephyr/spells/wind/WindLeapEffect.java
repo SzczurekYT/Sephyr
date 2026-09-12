@@ -7,15 +7,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import yt.szczurek.sephyr.spells.Spell;
-import yt.szczurek.sephyr.spells.SpellCtx;
-import yt.szczurek.sephyr.spells.SpellSequence;
-import yt.szczurek.sephyr.spells.Words;
+import yt.szczurek.sephyr.spells.*;
 
 public class WindLeapEffect extends Spell {
 
-    public WindLeapEffect() {
-        super();
+    public WindLeapEffect(String name) {
+        super(name, SpellElement.WIND);
     }
 
     @Override
@@ -42,15 +39,6 @@ public class WindLeapEffect extends Spell {
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
         }
         return Command.SINGLE_SUCCESS;
-    }
-
-    @Override
-    public void execute(SpellSequence sequence, SpellCtx params) {
-        Entity caster = params.castingEntity;
-        caster.setDeltaMovement(params.castDirection.scale(3.0));
-        if (caster instanceof ServerPlayer player) {
-            player.connection.send(new ClientboundSetEntityMotionPacket(player));
-        }
     }
 
     enum WindDirection {
