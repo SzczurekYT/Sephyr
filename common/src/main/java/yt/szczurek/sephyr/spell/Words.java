@@ -1,13 +1,14 @@
 package yt.szczurek.sephyr.spell;
 
+import org.jetbrains.annotations.UnmodifiableView;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Words {
-    private static final List<String> WORDS = new ArrayList<>();
-
     public static final String SELF = "ɛvi";
     public static final String SHOT = "wˈanga";
     public static final String CHARGE = "ɛkɐsuɾɯ";
@@ -26,10 +27,14 @@ public class Words {
     public static final String LIGHT = "prizim";
     public static final String DEBUG = "kɛjfida";
 
-    public static List<String> getList() {
-        if (!WORDS.isEmpty()) {
-            return WORDS;
-        }
+    private static final List<String> WORDS = collectWordList();
+
+    public static @UnmodifiableView List<String> getList() {
+        return Collections.unmodifiableList(WORDS);
+    }
+
+    private static ArrayList<String> collectWordList() {
+        ArrayList<String> result = new ArrayList<>();
 
         for (Field field : Words.class.getFields()) {
             if (field.getType() != String.class || !Modifier.isStatic(field.getModifiers())) {
@@ -37,12 +42,12 @@ public class Words {
             }
 
             try {
-                WORDS.add((String) field.get(null));
+                result.add((String) field.get(null));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        return WORDS;
+        return result;
     }
 }
