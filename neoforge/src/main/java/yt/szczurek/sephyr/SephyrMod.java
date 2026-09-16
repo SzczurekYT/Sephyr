@@ -33,7 +33,6 @@ public class SephyrMod {
     public static final Supplier<AttachmentType<List<String>>> CAST_WORDS = ATTACHMENT_TYPES.register(
             "cast_words",
             () -> AttachmentType.<List<String>>builder(() -> new ArrayList<>())
-                    .serialize(CastWords.CODEC.fieldOf("words"))
                     .sync(CastWords.STREAM_CODEC)
                     .build()
     );

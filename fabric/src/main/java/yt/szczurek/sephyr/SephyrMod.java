@@ -27,7 +27,6 @@ public class SephyrMod implements ModInitializer {
             identifier("cast_words"),
             builder -> builder
                     .initializer(ArrayList::new)
-                    .persistent(CastWords.CODEC)
                     .syncWith(CastWords.STREAM_CODEC, AttachmentSyncPredicate.all())
     );
 

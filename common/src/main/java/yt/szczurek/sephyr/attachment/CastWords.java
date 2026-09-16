@@ -1,6 +1,5 @@
 package yt.szczurek.sephyr.attachment;
 
-import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class CastWords {
-    public static final Codec<List<String>> CODEC = Codec.STRING.listOf();
     public static final StreamCodec<ByteBuf, List<String>> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list());
 
     public static List<String> get(Entity entity) {
