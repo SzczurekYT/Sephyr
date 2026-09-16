@@ -2,8 +2,7 @@ package yt.szczurek.sephyr;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import yt.szczurek.sephyr.spells.Spell;
-import yt.szczurek.sephyr.spells.SpellElement;
+import yt.szczurek.sephyr.spell.Spell;
 
 import static yt.szczurek.sephyr.Sephyr.identifier;
 

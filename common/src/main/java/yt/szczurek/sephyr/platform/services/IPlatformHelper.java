@@ -1,7 +1,6 @@
 package yt.szczurek.sephyr.platform.services;
 
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public interface IPlatformHelper {
 
@@ -35,4 +34,6 @@ public interface IPlatformHelper {
     default String getEnvironmentName() {
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    void sendCustomPacketToServer(CustomPacketPayload packet);
 }

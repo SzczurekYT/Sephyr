@@ -1,4 +1,4 @@
-package yt.szczurek.sephyr.spells;
+package yt.szczurek.sephyr.spell;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;

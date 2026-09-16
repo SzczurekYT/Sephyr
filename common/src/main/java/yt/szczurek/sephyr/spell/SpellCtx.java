@@ -1,4 +1,4 @@
-package yt.szczurek.sephyr.spells;
+package yt.szczurek.sephyr.spell;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -29,5 +29,16 @@ public class SpellCtx {
         this.castPos = castPos;
         this.castDirection = castDirection;
         this.targetPos = targetPos;
+    }
+
+    public SpellCtx(@NotNull SpellElement element, @NotNull Entity castingEntity, @NotNull Vec3 castPos, @NotNull Vec3 castDirection) {
+        this.element = element;
+        this.castingEntity = castingEntity;
+        this.castPos = castPos;
+        this.castDirection = castDirection;
+    }
+
+    public static SpellCtx fromEntity(Entity entity, SpellElement element) {
+        return new SpellCtx(element, entity, entity.getEyePosition(), entity.getLookAngle());
     }
 }

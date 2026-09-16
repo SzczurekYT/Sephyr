@@ -1,4 +1,4 @@
-package yt.szczurek.sephyr.spells;
+package yt.szczurek.sephyr.spell;
 
 import java.util.HashMap;
 

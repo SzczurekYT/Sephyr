@@ -1,4 +1,4 @@
-package yt.szczurek.sephyr.spells.wind;
+package yt.szczurek.sephyr.spell.wind;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import yt.szczurek.sephyr.spells.*;
+import yt.szczurek.sephyr.spell.*;
 
 public class WindLeapEffect extends Spell {
 
@@ -20,7 +20,12 @@ public class WindLeapEffect extends Spell {
         var forward = literal(Words.FORWARD).executes(ctx -> exec(ctx.getSource(), WindDirection.FORWARD));
         var reverse = literal(Words.REVERSE).executes(ctx -> exec(ctx.getSource(), WindDirection.BACK));
         var up = literal(Words.UP).executes(ctx -> exec(ctx.getSource(), WindDirection.UP));
-        return literal(Words.BLOW).then(literal(Words.SELF).then(forward).then(reverse).then(up)).build();
+        return literal(Words.BLOW).then(literal(Words.SELF)
+                .then(forward)
+                .then(reverse)
+                .then(up).
+                executes(ctx -> exec(ctx.getSource(), WindDirection.FORWARD))
+        ).build();
     }
 
 

@@ -1,4 +1,4 @@
-package yt.szczurek.sephyr.spells;
+package yt.szczurek.sephyr.spell;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -24,6 +24,7 @@ public class Words {
     public static final String WIND = "ʔalɪˈvɑn";
     public static final String FIRE = "ibaŋk";
     public static final String LIGHT = "prizim";
+    public static final String DEBUG = "kɛjfida";
 
     public static List<String> getList() {
         if (!WORDS.isEmpty()) {

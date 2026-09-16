@@ -8,14 +8,12 @@ import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 import yt.szczurek.sephyr.Sephyr;
 
-public record AddCastWordPacket(int entityId, String word) implements CustomPacketPayload {
+public record AddCastWordPacket(String word) implements CustomPacketPayload {
     public static final Identifier ID = Sephyr.identifier("add_cast_word");
 
     public static final CustomPacketPayload.Type<AddCastWordPacket> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AddCastWordPacket> CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT,
-            AddCastWordPacket::entityId,
             ByteBufCodecs.STRING_UTF8,
             AddCastWordPacket::word,
             AddCastWordPacket::new
