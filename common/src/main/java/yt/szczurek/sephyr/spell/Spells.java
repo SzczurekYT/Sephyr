@@ -3,8 +3,10 @@ package yt.szczurek.sephyr.spell;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import yt.szczurek.sephyr.SpellCastAttemptResult;
+import yt.szczurek.sephyr.platform.Services;
 import yt.szczurek.sephyr.spell.wind.WindBeamEffect;
 import yt.szczurek.sephyr.spell.wind.WindLeapEffect;
 
@@ -29,6 +31,15 @@ public class Spells {
         SpellCtx ctx = SpellCtx.fromEntity(entity, SpellElement.byWord(spell.getFirst()));
         ParseResults<SpellCtx> result = dispatcher.parse(spellString, ctx);
 
+        if (Services.PLATFORM.isDevelopmentEnvironment()) {
+            String msg;
+            if (force) {
+                msg = "DEBUG: force trying: " + spellString;
+            } else {
+                msg = "DEBUG: trying: " + spellString;
+            }
+            entity.level().getServer().getPlayerList().broadcastSystemMessage(Component.literal(msg), false);
+        }
 
         if (!result.getExceptions().isEmpty()) {
             return SpellCastAttemptResult.INVALID;
