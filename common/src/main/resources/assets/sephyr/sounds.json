@@ -1,0 +1,10 @@
+{
+  "spell_start_wind": {
+    "subtitle": "sound.sephyr.spell_start_wind",
+    "sounds": ["sephyr:spell_start_wind"]
+  },
+  "spell_running_wind": {
+    "subtitle": "sound.sephyr.spell_running_wind",
+    "sounds": ["sephyr:spell_running_wind"]
+  }
+}

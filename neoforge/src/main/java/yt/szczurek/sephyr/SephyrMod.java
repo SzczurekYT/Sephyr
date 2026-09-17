@@ -41,6 +41,7 @@ public class SephyrMod {
         Sephyr.init();
 
         ATTACHMENT_TYPES.register(eventBus);
+        NeoForgeSephyrSounds.SOUND_EVENTS.register(eventBus);
 
         eventBus.addListener(SephyrMod::registerRegistries);
         eventBus.addListener(SephyrMod::register);

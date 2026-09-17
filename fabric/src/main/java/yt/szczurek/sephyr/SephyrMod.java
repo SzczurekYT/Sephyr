@@ -7,9 +7,14 @@ import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
 import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.Holder;
 import net.minecraft.core.RegistrationInfo;
+import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.sounds.SoundEvent;
 import yt.szczurek.sephyr.attachment.CastWords;
 import yt.szczurek.sephyr.network.AddCastWordPacket;
 import yt.szczurek.sephyr.spell.Spell;
@@ -32,6 +37,17 @@ public class SephyrMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
+        Identifier spellStartWindId = identifier("spell_start_wind");
+        SephyrSounds.SPELL_START_WIND = Holder.direct(
+                Registry.register(BuiltInRegistries.SOUND_EVENT, spellStartWindId,
+                SoundEvent.createVariableRangeEvent(spellStartWindId))
+        );
+        Identifier spellRunningWindId = identifier("spell_running_wind");
+        SephyrSounds.SPELL_RUNNING_WIND = Holder.direct(
+                Registry.register(BuiltInRegistries.SOUND_EVENT, spellRunningWindId,
+                        SoundEvent.createVariableRangeEvent(spellRunningWindId))
+        );
+
         WritableRegistry<Spell> spellImplRegistry = FabricRegistryBuilder.create(SephyrRegistries.SPELL).buildAndRegister();
 
         Spells.register((name, spell) -> {
