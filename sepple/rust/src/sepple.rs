@@ -2,6 +2,7 @@ use std::{sync::atomic::Ordering, time::Duration};
 
 use sepple::{
     dictionary::Dictionary,
+    error::SeppleError,
     pipeline::{
         Pipeline,
         processor::{
@@ -28,17 +29,17 @@ pub struct Sepple {
 }
 
 impl Sepple {
-    pub fn init(model_path: &str, dictionary: Vec<String>) -> Self {
+    pub fn init(model_path: &str, dictionary: Vec<String>) -> Result<Self, SeppleError> {
         let sliding_window_config = SlidingWindowConfig {
             window_size: Duration::from_millis(1000),
             cut_left: Duration::from_millis(150),
             cut_right: Duration::from_millis(150),
         };
         let vad_scorer = SileroVadScorer::init();
-        let ipa_processor = IpaProcessor::init(model_path, &sliding_window_config);
+        let ipa_processor = IpaProcessor::init(model_path, &sliding_window_config)?;
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
-        let pipeline = Pipeline::new(AudioCapture)
+        let pipeline = Pipeline::new(AudioCapture::new()?)
             .then(AudioChunker::new(vad::CHUNK_SIZE))
             .then(vad_scorer)
             .then(VadFilter::new(0.35, 0.35, 10))
@@ -49,7 +50,7 @@ impl Sepple {
             .then(ipa_processor)
             .then(word_detector);
 
-        Sepple { pipeline }
+        Ok(Sepple { pipeline })
     }
 
     pub fn run(self, callback: &WordConsumer) {

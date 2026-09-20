@@ -9,8 +9,12 @@ import java.util.function.Consumer;
 
 public class Sepple {
 
-    public static void init(String modelPath, List<String> dictionary) {
-        SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary));
+    public static boolean init(String modelPath, List<String> dictionary) {
+        if (modelPath == null) {
+            modelPath = "";
+        }
+        Instance<Boolean> result = SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary));
+        return Java2RustUtils.getObjectCasted(result);
     }
 
     public static void run(Consumer<String> callback) {

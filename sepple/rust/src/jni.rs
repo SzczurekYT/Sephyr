@@ -4,12 +4,13 @@ use std::{
         Condvar, Mutex,
         atomic::{AtomicBool, Ordering},
     },
-    thread::{self, Thread},
+    thread::{self},
     time::Instant,
 };
 
-use j4rs::{InvocationArg, errors::J4RsError, prelude::*};
+use j4rs::{InvocationArg, prelude::*};
 use j4rs_derive::*;
+use sepple::error::SeppleError;
 
 use crate::sepple::Sepple;
 
@@ -18,7 +19,7 @@ static SEPPLE: (Mutex<Option<Sepple>>, Condvar) = (Mutex::new(None), Condvar::ne
 static IS_RUNNING: AtomicBool = AtomicBool::new(false);
 pub(crate) static SHOULD_STOP: AtomicBool = AtomicBool::new(false);
 
-pub fn print_error(error: &J4RsError, context: &str) {
+pub fn print_error(error: &dyn Display, context: &str) {
     let string = "[Sephyr/Sepple]: An error occured.\n".to_owned()
         + "If you see this, please open an issue in the Sephyr mod.\n"
         + "The error happened while "
@@ -69,12 +70,22 @@ where
 }
 
 #[call_from_java("yt.szczurek.sepple.SeppleBinding.init")]
-fn init(path: Instance, dictionary: Instance) {
+fn init_java(path: Instance, dictionary: Instance) -> Result<Instance, String> {
     let jvm = Jvm::attach_thread().unwrap();
 
     let path: String = jvm.to_rust(path).unwrap();
     let dictionary: Vec<String> = jvm.to_rust(dictionary).unwrap();
 
+    let init_result = init(path, dictionary);
+
+    if let Err(err) = &init_result {
+        log(&format!("Sepple init failed! Error:\n{err:?}"));
+    }
+
+    to_java(init_result.is_ok())
+}
+
+fn init(path: String, dictionary: Vec<String>) -> Result<(), SeppleError> {
     log("Initializing sepple");
     let thread = thread::current();
     let thread_name = thread
@@ -83,13 +94,14 @@ fn init(path: Instance, dictionary: Instance) {
         .unwrap_or_else(|| format!("unnamed thread of id: {:?}", thread.id()));
     log(&format!("On {thread_name}",));
     let load_start = Instant::now();
-    let sepple = Sepple::init(&path, dictionary);
+    let sepple = Sepple::init(&path, dictionary)?;
 
     *SEPPLE.0.lock().unwrap() = Some(sepple);
 
     SEPPLE.1.notify_all();
 
     log(&format!("Init done (took: {:.2?})", load_start.elapsed()));
+    Ok(())
 }
 
 #[call_from_java("yt.szczurek.sepple.SeppleBinding.run")]

@@ -28,7 +28,6 @@
           libpulseaudio
           # Sepple deps
           alsa-lib
-          openssl
         ];
       in
       with pkgs;
