@@ -17,6 +17,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import yt.szczurek.sephyr.attachment.CastWords;
 import yt.szczurek.sephyr.network.AddCastWordPacket;
+import yt.szczurek.sephyr.network.CastWordTimeoutPacket;
 import yt.szczurek.sephyr.spell.Spell;
 import yt.szczurek.sephyr.spell.Spells;
 import yt.szczurek.sephyr.network.ServerNetworkHandler;
@@ -55,10 +56,16 @@ public class SephyrMod implements ModInitializer {
             spellImplRegistry.register(key, spell, RegistrationInfo.BUILT_IN);
         });
 
-        PayloadTypeRegistry.clientboundPlay().register(AddCastWordPacket.TYPE, AddCastWordPacket.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(AddCastWordPacket.TYPE, AddCastWordPacket.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(AddCastWordPacket.TYPE, (packet, context) -> {
             ServerNetworkHandler.handleAddCastWord(packet, context.player());
+        });
+
+        PayloadTypeRegistry.serverboundPlay().register(CastWordTimeoutPacket.TYPE, CastWordTimeoutPacket.CODEC);
+
+        ServerPlayNetworking.registerGlobalReceiver(CastWordTimeoutPacket.TYPE, (packet, context) -> {
+            ServerNetworkHandler.handleCastWordTimeout(packet, context.player());
         });
 
         Sephyr.init();
