@@ -1,15 +1,216 @@
+buildscript {
+    dependencies {
+        classpath 'at.yawk.lz4:lz4-java:1.11.0'
+    }
+}
+
 plugins {
     id 'java'
 }
 
-java {
-    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+import net.jpountz.lz4.LZ4FrameOutputStream
+import org.apache.tools.ant.taskdefs.condition.Os
+
+import java.nio.file.Files
+
+static def mac(arch) {
+    [triple: "${arch}-apple-darwin", suffix: "", arch: arch, os: "macos", ext: "dylib", lib: true]
 }
 
-jar {
-    from('../../sepple/rust/target/release/libsepple_java.so') {
-        into 'natives/'
+static def linux(arch) {
+    [triple: "${arch}-unknown-linux-gnu", suffix: "", arch: arch, os: "linux", ext: "so", lib: true]
+}
+
+static def windows(arch) {
+    [triple: "${arch}-pc-windows-msvc", suffix: "", arch: arch, os: "windows", ext: "dll", lib: false]
+}
+
+def supportedTargets = [
+        mac("x86_64"),
+        mac("aarch64"),
+        linux("x86_64"),
+        linux("aarch64"),
+        windows("x86_64"),
+        windows("aarch64"),
+]
+def rustDir = file("../rust")
+def nativesDir = file("src/main/resources/natives/sepple_java")
+def cargoCacheDir = project.layout.buildDirectory.file("cargo").get().asFile
+def docker = Os.isFamily(Os.FAMILY_MAC) ? "/usr/local/bin/docker" : "docker"
+project.ext.xWinImage = 'localhost/sepple-build-xwin'
+project.ext.zigbuildImage = 'localhost/sepple-build-zigbuild'
+def rustVersion = '1.98.1'
+
+project.ext.baseDockerCommand = [
+        docker,
+        'run',
+        '--rm',
+        '-v',
+        "$rustDir:/io",
+        '-v',
+        "$cargoCacheDir/git:/usr/local/cargo/git",
+        '-v',
+        "$cargoCacheDir/registry:/usr/local/cargo/registry",
+        '-w',
+        '/io',
+]
+
+tasks.register('createContainersDirectory') {
+    doLast {
+        new File(cargoCacheDir, "git").mkdirs()
+        new File(cargoCacheDir, "registry").mkdirs()
     }
+}
+
+tasks.register('buildZigbuildImage', Exec) {
+    group = 'rust'
+    workingDir rustDir
+    commandLine docker, 'build', '-t', project.ext.zigbuildImage, 'container/zigbuild', '--build-arg', "RUST_VERSION=${rustVersion}"
+    dependsOn createContainersDirectory
+}
+
+tasks.register('buildXWinImage', Exec) {
+    group = 'rust'
+    workingDir rustDir
+    commandLine docker, 'build', '-t', project.ext.xWinImage, 'container/xwin', '--build-arg', "RUST_VERSION=${rustVersion}"
+    dependsOn createContainersDirectory
+}
+
+tasks.register('buildDockerImages') {
+    group = 'rust'
+    dependsOn buildZigbuildImage, buildXWinImage
+}
+
+tasks.register('cleanRust', Exec) {
+    group = 'rust'
+    workingDir rustDir
+    commandLine dockerCommandForTarget(linux("x86_64"))
+    args 'clean'
+    dependsOn createContainersDirectory
+}
+
+def compileRustTaskName = { target ->
+    "compileRust-${target.os}-${target.arch}"
+}
+
+def dockerCommandForTarget(target) {
+    def result = []
+    result.addAll(project.ext.baseDockerCommand)
+    if (target.arch == "aarch64") {
+        result.addAll([
+            '-e', 'PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig',
+        ])
+    }
+    if (target.os == "windows") {
+        result.add(project.ext.xWinImage)
+    } else {
+        result.add(project.ext.zigbuildImage)
+    }
+    result.add('cargo')
+    result
+}
+
+def commandLineForTarget(target) {
+    if (target.triple.contains('msvc')) {
+        [dockerCommandForTarget(target), 'xwin', 'build', '--target', target.triple + target.suffix].flatten()
+    } else {
+        [dockerCommandForTarget(target), 'zigbuild', '--target', target.triple + target.suffix].flatten()
+    }
+}
+
+static def nativesNameForTarget(target) {
+    "sepple_java_${target.arch}_${target.os}.${target.ext}"
+}
+
+supportedTargets.forEach { target ->
+    tasks.register(compileRustTaskName(target), Exec) {
+        group = 'rust'
+        workingDir rustDir
+        description = "Cross-compiles natives for the ${target.triple} target"
+        def commands = commandLineForTarget(target)
+        commands.add('--release')
+        commandLine = commands
+        dependsOn createContainersDirectory
+    }
+}
+
+tasks.register("compileRustDev", Exec) {
+    group = 'rust'
+    workingDir rustDir
+    description = "Compiles debug natives"
+    commandLine 'cargo', 'build', '--release'
+}
+
+tasks.register('buildRustNatives') {
+    group = 'build'
+    description = 'Compiles all Rust natives and moves them to resources.'
+    dependsOn buildDockerImages
+    dependsOn += supportedTargets.stream().map(compileRustTaskName).collect()
+    finalizedBy copyRustNatives
+}
+
+tasks.register('buildRustNativesDev') {
+    group = 'build'
+    description = 'Compiles debug natives and moves them to resources.'
+    dependsOn compileRustDev
+    finalizedBy copyRustNativesDev
+}
+
+tasks.register('copyRustNatives', Copy) {
+    group = 'rust'
+    into nativesDir
+    mustRunAfter(buildRustNatives)
+
+    supportedTargets.forEach { target ->
+        from(file("$rustDir/target/${target.triple}/release/${if (target.lib) { "lib" } else { "" }}sepple_java.${target.ext}")) {
+            rename { nativesNameForTarget(target) }
+        }
+    }
+    finalizedBy packRustNatives
+}
+
+tasks.register('copyRustNativesDev', Copy) {
+    group = 'rust'
+    into nativesDir
+    mustRunAfter(buildRustNativesDev)
+
+    supportedTargets.forEach { target ->
+        var library = file("$rustDir/target/release/${if (target.lib) { "lib" } else { "" }}sepple_java.${target.ext}")
+        if (!library.exists()) return
+
+        from(library) {
+            rename { nativesNameForTarget(target) }
+        }
+    }
+    finalizedBy packRustNatives
+}
+
+tasks.register('packRustNatives', Zip) {
+    group = 'rust'
+    archiveFile.set file("${nativesDir}/sepple_java_binaries.zip.l4z")
+    entryCompression = ZipEntryCompression.STORED
+    into nativesDir
+
+    mustRunAfter copyRustNatives, copyRustNativesDev
+    supportedTargets.forEach { target ->
+        var f = nativesNameForTarget(target)
+        from(file("${nativesDir}/${f}")) { eachFile { setPath f } }
+    }
+    doLast {
+        byte[] bytes = Files.readAllBytes(getArchiveFile().get().asFile.toPath())
+        try (var f = new FileOutputStream(getArchiveFile().get().asFile)) {
+            try (var x = new LZ4FrameOutputStream(f, LZ4FrameOutputStream.BLOCKSIZE.SIZE_4MB, bytes.length, LZ4FrameOutputStream.FLG.Bits.BLOCK_INDEPENDENCE)) {
+                x.write(bytes)
+            }
+        }
+        supportedTargets.forEach { t ->
+            delete(file("${nativesDir}/${nativesNameForTarget(t)}"))
+        }
+    }
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
 }
 
 repositories {
@@ -18,4 +219,5 @@ repositories {
 
 dependencies {
     implementation "io.github.astonbitecode:j4rs:${project.j4rs_version}"
+    implementation "at.yawk.lz4:lz4-java:${project.lz4_version}"
 }
