@@ -138,7 +138,7 @@ tasks.register("compileRustDev", Exec) {
     group = 'rust'
     workingDir rustDir
     description = "Compiles debug natives"
-    commandLine 'cargo', 'build', '--release'
+    commandLine 'cargo', 'build'
 }
 
 tasks.register('buildRustNatives') {
@@ -175,7 +175,7 @@ tasks.register('copyRustNativesDev', Copy) {
     mustRunAfter(buildRustNativesDev)
 
     supportedTargets.forEach { target ->
-        var library = file("$rustDir/target/release/${if (target.lib) { "lib" } else { "" }}sepple_java.${target.ext}")
+        var library = file("$rustDir/target/debug/${if (target.lib) { "lib" } else { "" }}sepple_java.${target.ext}")
         if (!library.exists()) return
 
         from(library) {

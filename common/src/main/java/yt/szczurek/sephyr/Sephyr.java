@@ -33,7 +33,8 @@ public class Sephyr {
             LOG.atLevel(level).log("(Sepple/Rust) {}", message);
         });
         // We do the init off thread, so we don't slow down game start
-        Thread initThread = new Thread(Sephyr::initSepple);
+        // We also allocate bigger stack, because Rust can sometime require more than Java allocates by default
+        Thread initThread = new Thread(null, Sephyr::initSepple, "SeppleNativeThread", 2 * 1024 * 1024L);
         initThread.start();
     }
 
