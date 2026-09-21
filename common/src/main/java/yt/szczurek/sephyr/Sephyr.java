@@ -7,6 +7,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import yt.szczurek.sephyr.spell.Words;
 import yt.szczurek.sephyr.spell.casting.ClientCastingManager;
 import yt.szczurek.sepple.Sepple;
@@ -27,7 +28,10 @@ public class Sephyr {
     public static void init() {}
 
     public static void clientInit() {
-        Sepple.setupLogging(message -> LOG.info("(Sepple/Rust) {}", message));
+        Sepple.setupLogging((message, isError) -> {
+            Level level = isError ? Level.ERROR : Level.INFO;
+            LOG.atLevel(level).log("(Sepple/Rust) {}", message);
+        });
         // We do the init off thread, so we don't slow down game start
         Thread initThread = new Thread(Sephyr::initSepple);
         initThread.start();
@@ -45,6 +49,7 @@ public class Sephyr {
     }
 
     private static void initSepple() {
+        // Model path can be overridden here for development if needed
         seppleLoadFailed = !Sepple.init(null, Words.getList());
         if (seppleLoadFailed && mcClientLoaded) {
             sendSeppleFailToast(Minecraft.getInstance());

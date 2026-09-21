@@ -14,7 +14,7 @@ use sepple::error::SeppleError;
 
 use crate::sepple::Sepple;
 
-static LOG_CALLBACK: Mutex<Option<WordConsumer>> = Mutex::new(None);
+static LOG_CALLBACK: Mutex<Option<LogConsumer>> = Mutex::new(None);
 static SEPPLE: (Mutex<Option<Sepple>>, Condvar) = (Mutex::new(None), Condvar::new());
 static IS_RUNNING: AtomicBool = AtomicBool::new(false);
 pub(crate) static SHOULD_STOP: AtomicBool = AtomicBool::new(false);
@@ -58,6 +58,50 @@ impl From<Instance> for WordConsumer {
     }
 }
 
+pub struct LogConsumer {
+    instance: Instance,
+}
+
+impl LogConsumer {
+    pub fn accept(&self, string: &str, is_error: bool) {
+        let jvm = Jvm::attach_thread().unwrap();
+
+        let text_arg = match InvocationArg::try_from(string) {
+            Ok(arg) => arg,
+            Err(err) => {
+                print_error(&err, "creating log consumer callback arg");
+                return;
+            }
+        };
+        let error_arg = match InvocationArg::try_from(is_error) {
+            Ok(arg) => arg,
+            Err(err) => {
+                print_error(&err, "creating log consumer isError arg");
+                return;
+            }
+        };
+
+        let error_arg = match error_arg.into_primitive() {
+            Ok(arg) => arg,
+            Err(err) => {
+                print_error(&err, "casting log consumer isError arg to primitive");
+                return;
+            }
+        };
+
+        let result = jvm.invoke(&self.instance, "accept", &[text_arg, error_arg]);
+        if let Err(err) = result {
+            print_error(&err, "calling log consumer callback");
+        }
+    }
+}
+
+impl From<Instance> for LogConsumer {
+    fn from(value: Instance) -> Self {
+        LogConsumer { instance: value }
+    }
+}
+
 fn to_java<T>(value: T) -> Result<Instance, String>
 where
     InvocationArg: TryFrom<T>,
@@ -79,20 +123,20 @@ fn init_java(path: Instance, dictionary: Instance) -> Result<Instance, String> {
     let init_result = init(path, dictionary);
 
     if let Err(err) = &init_result {
-        log(&format!("Sepple init failed! Error:\n{err:?}"));
+        log(&format!("Sepple init failed! Error:\n{err}"), true);
     }
 
     to_java(init_result.is_ok())
 }
 
 fn init(path: String, dictionary: Vec<String>) -> Result<(), SeppleError> {
-    log("Initializing sepple");
+    log("Initializing sepple", false);
     let thread = thread::current();
     let thread_name = thread
         .name()
         .map(str::to_string)
         .unwrap_or_else(|| format!("unnamed thread of id: {:?}", thread.id()));
-    log(&format!("On {thread_name}",));
+    log(&format!("On {thread_name}",), false);
     let load_start = Instant::now();
     let sepple = Sepple::init(&path, dictionary)?;
 
@@ -100,7 +144,10 @@ fn init(path: String, dictionary: Vec<String>) -> Result<(), SeppleError> {
 
     SEPPLE.1.notify_all();
 
-    log(&format!("Init done (took: {:.2?})", load_start.elapsed()));
+    log(
+        &format!("Init done (took: {:.2?})", load_start.elapsed()),
+        false,
+    );
     Ok(())
 }
 
@@ -111,7 +158,7 @@ fn run(callback: Instance) {
         .name()
         .map(str::to_string)
         .unwrap_or_else(|| format!("unnamed thread of id: {:?}", thread.id()));
-    log(&format!("Starting sepple. {thread_name}",));
+    log(&format!("Starting sepple. {thread_name}",), false);
     let mut sepple_guard = SEPPLE.0.lock().unwrap();
     while sepple_guard.is_none() {
         sepple_guard = SEPPLE.1.wait(sepple_guard).unwrap();
@@ -122,12 +169,12 @@ fn run(callback: Instance) {
     drop(sepple_guard);
 
     IS_RUNNING.store(true, Ordering::SeqCst);
-    log("Sepple is listening.");
+    log("Sepple is listening.", false);
 
     sepple.run(&callback.into());
 
     IS_RUNNING.store(false, Ordering::SeqCst);
-    log("Sepple stopped.");
+    log("Sepple stopped.", false);
 }
 
 #[call_from_java("yt.szczurek.sepple.SeppleBinding.stop")]
@@ -145,11 +192,11 @@ fn setup_logging(log_consumer: Instance) {
     *LOG_CALLBACK.lock().unwrap() = Some(log_consumer.into());
 }
 
-pub fn log(text: &str) {
+pub fn log(text: &str, is_error: bool) {
     LOG_CALLBACK
         .lock()
         .unwrap()
         .as_ref()
         .expect("called log before logging was setup")
-        .accept(text);
+        .accept(text, is_error);
 }

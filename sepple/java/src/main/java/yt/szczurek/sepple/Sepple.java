@@ -5,6 +5,7 @@ import org.astonbitecode.j4rs.api.Instance;
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Sepple {
@@ -30,7 +31,7 @@ public class Sepple {
         return Java2RustUtils.getObjectCasted(result);
     }
 
-    public static void setupLogging(Consumer<String> callback) {
-        SeppleBinding.setupLogging(Java2RustUtils.createInstance(new WordCallback(callback)));
+    public static void setupLogging(BiConsumer<String, Boolean> callback) {
+        SeppleBinding.setupLogging(Java2RustUtils.createInstance(new LogCallback(callback)));
     }
 }
