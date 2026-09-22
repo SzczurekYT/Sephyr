@@ -14,4 +14,11 @@ tokio = "1.53.1"
 
 # Optimize deps, so it doesn't run slow
 [profile.dev.package."*"]
-opt-level = 3
+opt-level = "z"
+
+[profile.release]
+lto = "thin"
+strip = true
+
+[profile.release.package."*"]
+opt-level = "z"

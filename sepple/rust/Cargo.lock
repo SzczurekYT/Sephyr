@@ -4644,7 +4644,7 @@ dependencies = [
 [[package]]
 name = "multipa-model"
 version = "0.1.0"
-source = "git+https://github.com/SzczurekYT/Sepple#c117b22d7deddf321ba4fdb1aaa6b0727faf4d00"
+source = "git+https://github.com/SzczurekYT/Sepple#ae129b2a31ede12be848e09e0a6ffe05c6318d2f"
 dependencies = [
  "burn",
  "burn-store",
@@ -6609,7 +6609,7 @@ checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
 [[package]]
 name = "sepple"
 version = "0.1.0"
-source = "git+https://github.com/SzczurekYT/Sepple#c117b22d7deddf321ba4fdb1aaa6b0727faf4d00"
+source = "git+https://github.com/SzczurekYT/Sepple#ae129b2a31ede12be848e09e0a6ffe05c6318d2f"
 dependencies = [
  "bunsen",
  "burn",
@@ -6622,7 +6622,6 @@ dependencies = [
  "multipa-model",
  "phonetics-rs",
  "reqwest 0.13.5",
- "serde",
  "serde_json",
  "tempfile",
  "thiserror 2.0.20",
