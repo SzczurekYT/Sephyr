@@ -22,11 +22,11 @@ public class SephyrClientMod {
     }
 
     private void clientPlayerJoinWorld(ClientPlayerNetworkEvent.LoggingIn event) {
-        Sephyr.startSepple();
+        SeppleManager.startSepple();
     }
 
     private void clientPlayerLeaveWorld(ClientPlayerNetworkEvent.LoggingOut event) {
-        Sephyr.stopSepple();
+        SeppleManager.stopSepple();
     }
 
     private void clientTick(ClientTickEvent.Post event) {

@@ -10,11 +10,11 @@ public class SephyrClientMod implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayConnectionEvents.JOIN.register((_, _, _) -> {
-            Sephyr.startSepple();
+            SeppleManager.startSepple();
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((_, _) -> {
-            Sephyr.stopSepple();
+            SeppleManager.stopSepple();
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(_ -> {

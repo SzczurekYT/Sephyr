@@ -19,7 +19,7 @@ public class SeppleBinding {
     private static final String LIB_NAME = "sepple_java";
     public static final String NATIVE_NAME = getNativeName();
 
-    protected static native Instance<Boolean> init(Instance<String> path, Instance<List<String>> dictionary);
+    protected static native Instance<Boolean> init(Instance<String> path, Instance<List<String>> dictionary, Instance<ProgressCallback> progressCallback, Instance<ModelLoadingCallback> modelLoadingCallback);
     protected static native void run(Instance<WordCallback> callback);
     protected static native void stop();
     protected static native Instance<Boolean> isRunning();

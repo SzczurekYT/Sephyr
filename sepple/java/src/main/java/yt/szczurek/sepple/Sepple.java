@@ -10,11 +10,11 @@ import java.util.function.Consumer;
 
 public class Sepple {
 
-    public static boolean init(String modelPath, List<String> dictionary) {
+    public static boolean init(String modelPath, List<String> dictionary, ProgressCallback progressCallback, ModelLoadingCallback modelLoadingCallback) {
         if (modelPath == null) {
             modelPath = "";
         }
-        Instance<Boolean> result = SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary));
+        Instance<Boolean> result = SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary), Java2RustUtils.createInstance(progressCallback), Java2RustUtils.createInstance(modelLoadingCallback));
         return Java2RustUtils.getObjectCasted(result);
     }
 
