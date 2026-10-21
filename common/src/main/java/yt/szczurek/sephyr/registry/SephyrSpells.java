@@ -1,28 +1,31 @@
-package yt.szczurek.sephyr.spell;
+package yt.szczurek.sephyr.registry;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.blay09.mods.balm.Balm;
+import net.blay09.mods.balm.core.BalmRegistrar;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import yt.szczurek.sephyr.SpellCastAttemptResult;
-import yt.szczurek.sephyr.platform.Services;
+import yt.szczurek.sephyr.spell.Spell;
+import yt.szczurek.sephyr.spell.SpellCtx;
+import yt.szczurek.sephyr.spell.SpellElement;
 import yt.szczurek.sephyr.spell.wind.WindBeamEffect;
 import yt.szczurek.sephyr.spell.wind.WindLeapEffect;
 
 import java.util.List;
-import java.util.function.BiConsumer;
 
-public class Spells {
+public class SephyrSpells {
     public static final CommandDispatcher<SpellCtx> dispatcher = new CommandDispatcher<>();
 
-    public static void register(BiConsumer<String, Spell> consumer) {
-        register(consumer, "wind_leap", new WindLeapEffect("Wind leap"));
-        register(consumer, "wind_beam", new WindBeamEffect("Wind beam"));
+    public static void register(BalmRegistrar.Scoped<Spell> spells) {
+        register(spells, "wind_leap", new WindLeapEffect("Wind leap"));
+        register(spells, "wind_beam", new WindBeamEffect("Wind beam"));
     }
 
-    private static void register(BiConsumer<String, Spell> consumer, String name, Spell spell) {
-        consumer.accept(name, spell);
+    private static void register(BalmRegistrar.Scoped<Spell> spells, String name, Spell spell) {
+        spells.register(name, _ -> spell);
         dispatcher.register(spell.getNode());
     }
 
@@ -31,7 +34,8 @@ public class Spells {
         SpellCtx ctx = SpellCtx.fromEntity(entity, SpellElement.byWord(spell.getFirst()));
         ParseResults<SpellCtx> result = dispatcher.parse(spellString, ctx);
 
-        if (Services.PLATFORM.isDevelopmentEnvironment()) {
+
+        if (Balm.platform().isDevelopmentEnvironment()) {
             String msg;
             if (force) {
                 msg = "DEBUG: force trying: " + spellString;

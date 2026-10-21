@@ -1,11 +1,11 @@
 package yt.szczurek.sephyr.spell.casting;
 
+import net.blay09.mods.balm.Balm;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import yt.szczurek.sephyr.Sephyr;
 import yt.szczurek.sephyr.network.AddCastWordPacket;
 import yt.szczurek.sephyr.network.CastWordTimeoutPacket;
-import yt.szczurek.sephyr.platform.Services;
 import yt.szczurek.sephyr.spell.SpellElement;
 
 public class ClientCastingManager {
@@ -21,7 +21,7 @@ public class ClientCastingManager {
 
         lastWordTimestamp = System.currentTimeMillis();
         displayCastWord(word);
-        Services.PLATFORM.sendCustomPacketToServer(new AddCastWordPacket(word));
+        Balm.networking().sendToServer(new AddCastWordPacket(word));
     }
 
     public void displayCastWord(String word) {
@@ -37,7 +37,7 @@ public class ClientCastingManager {
 
     public void tick() {
         if (System.currentTimeMillis() - WORD_TIMEOUT_MS > lastWordTimestamp) {
-            Services.PLATFORM.sendCustomPacketToServer(new CastWordTimeoutPacket());
+            Balm.networking().sendToServer(new CastWordTimeoutPacket());
             lastWordTimestamp = Long.MAX_VALUE;
         }
     }

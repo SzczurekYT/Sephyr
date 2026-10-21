@@ -2,15 +2,13 @@ package yt.szczurek.sephyr.spell.casting;
 
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import yt.szczurek.sephyr.SephyrSounds;
+import yt.szczurek.sephyr.registry.SephyrSounds;
 import yt.szczurek.sephyr.SpellCastAttemptResult;
 import yt.szczurek.sephyr.attachment.CastWords;
-import yt.szczurek.sephyr.spell.Spells;
+import yt.szczurek.sephyr.registry.SephyrSpells;
 import yt.szczurek.sephyr.spell.Words;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public class ServerCastingManager {
     public static void addWord(Entity entity, String word) {
@@ -31,7 +29,7 @@ public class ServerCastingManager {
             return;
         }
 
-        SpellCastAttemptResult result = Spells.tryExecute(words, entity, false);
+        SpellCastAttemptResult result = SephyrSpells.tryExecute(words, entity, false);
 
         if (result == SpellCastAttemptResult.EXECUTED) {
             CastWords.clear(entity);
@@ -45,7 +43,7 @@ public class ServerCastingManager {
             return;
         }
 
-        SpellCastAttemptResult result = Spells.tryExecute(words, entity, true);
+        SpellCastAttemptResult result = SephyrSpells.tryExecute(words, entity, true);
 
         CastWords.clear(entity);
     }

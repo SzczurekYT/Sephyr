@@ -1,9 +1,13 @@
 package yt.szczurek.sephyr;
 
+import net.blay09.mods.balm.core.BalmRegistrars;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import yt.szczurek.sephyr.attachment.CastWords;
+import yt.szczurek.sephyr.network.ServerNetworkHandler;
+import yt.szczurek.sephyr.registry.SephyrRegistries;
 import yt.szczurek.sephyr.spell.casting.ClientCastingManager;
 
 public class Sephyr {
@@ -16,10 +20,9 @@ public class Sephyr {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    public static void init() {}
-
-    public static void clientInit() {
-        SeppleManager.clientInit();
+    public static void init(BalmRegistrars registrars) {
+        SephyrRegistries.register(registrars);
+        ServerNetworkHandler.register();
     }
 
     public static void clientTick() {

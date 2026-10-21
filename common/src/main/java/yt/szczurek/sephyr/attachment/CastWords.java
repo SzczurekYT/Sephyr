@@ -1,44 +1,66 @@
 package yt.szczurek.sephyr.attachment;
 
+import com.google.common.collect.ImmutableList;
 import io.netty.buffer.ByteBuf;
+import net.blay09.mods.balm.platform.attachment.BalmDataAttachmentTypeRegistrar;
+import net.blay09.mods.balm.platform.attachment.DataAttachmentLookup;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.Entity;
-import yt.szczurek.sephyr.platform.Services;
+import org.jspecify.annotations.NonNull;
 import yt.szczurek.sephyr.spell.casting.ServerCastingManager;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.function.Function;
 
 public class CastWords {
-    public static final StreamCodec<ByteBuf, List<String>> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list());
+    public static final StreamCodec<ByteBuf, ImmutableList<String>> STREAM_CODEC = ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()).map(ImmutableList::copyOf, Function.identity());
 
-    public static List<String> get(Entity entity) {
-        return Services.WORDS_ATTACHMENT.getWords(entity);
+    private static DataAttachmentLookup<ImmutableList<String>> LOOKUP;
+
+    public static void register(BalmDataAttachmentTypeRegistrar registrar) {
+        LOOKUP = registrar.<ImmutableList<String>>register("cast_words",
+                builder -> builder.initializer(ImmutableList::of)
+                        .networkSynchronized(STREAM_CODEC)
+        ).asLookup();
+    }
+
+    public static @NonNull ImmutableList<String> get(Entity entity) {
+        return LOOKUP.getOrCreate(entity);
+    }
+
+    public static void setWords(Entity entity, ImmutableList<String> words) {
+        LOOKUP.update(entity, words);
     }
 
     public static void add(Entity entity, String word) {
-        Services.WORDS_ATTACHMENT.addWord(entity, word);
-        onChanged(entity);
+        ImmutableList<String> words = new ImmutableList.Builder<String>()
+                .addAll(get(entity))
+                .add(word)
+                .build();
+        setWords(entity, words);
+        onChanged(words, entity);
     }
 
-    public static void addAll(Entity entity, Collection<String> words) {
-        Services.WORDS_ATTACHMENT.addWords(entity, words);
-        onChanged(entity);
+    void addWords(Entity entity, Collection<String> toAdd) {
+        ImmutableList<String> words = new ImmutableList.Builder<String>()
+                .addAll(get(entity))
+                .addAll(toAdd)
+                .build();
+        setWords(entity, words);
+        onChanged(words, entity);
     }
 
     public static void clear(Entity entity) {
-        Services.WORDS_ATTACHMENT.clearWords(entity);
-        onChanged(entity);
+        LOOKUP.remove(entity);
+        onChanged(ImmutableList.of(), entity);
     }
 
-    public static boolean hasWords(Entity entity) {
-        return Services.WORDS_ATTACHMENT.hasWords(entity);
+    public boolean hasWords(Entity entity) {
+       return LOOKUP.has(entity);
     }
 
-    private static void onChanged(Entity entity) {
-        List<String> words = get(entity);
-
+    private static void onChanged(ImmutableList<String> words, Entity entity) {
         ServerCastingManager.onChanged(entity, words);
     }
 }
