@@ -38,6 +38,10 @@ neoForge {
         }
     }
 }
+tasks.named('downloadAssets') {
+    javaExecutable.set(System.getProperty('java.home') + "/bin/java")
+}
+
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
