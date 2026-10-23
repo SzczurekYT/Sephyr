@@ -25,8 +25,8 @@ public class SephyrSpells {
     public static final CommandDispatcher<SpellCtx> dispatcher = new CommandDispatcher<>();
 
     public static void register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells) {
-        WIND_LEAP = register(spells, "wind_leap", new SpellDefinition<>(SpellElement.WIND, WindLeapSpell.STREAM_CODEC, WindLeapSpell::buildNode));
-        WIND_BEAM = register(spells, "wind_beam", new SpellDefinition<>(SpellElement.WIND, WindBeamSpell.STREAM_CODEC, WindBeamSpell::buildNode));
+        WIND_LEAP = register(spells, "wind_leap", new SpellDefinition<>(SpellElement.WIND, 6 * 20, WindLeapSpell.STREAM_CODEC, WindLeapSpell::buildNode));
+        WIND_BEAM = register(spells, "wind_beam", new SpellDefinition<>(SpellElement.WIND, 5 * 20, WindBeamSpell.STREAM_CODEC, WindBeamSpell::buildNode));
     }
 
     private static <S extends Spell> Holder<SpellDefinition<S>> register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells, String name, SpellDefinition<S> spellDefinition) {

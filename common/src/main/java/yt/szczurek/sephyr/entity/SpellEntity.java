@@ -69,6 +69,17 @@ public class SpellEntity extends Entity {
     }
 
     @Override
+    public void tick() {
+        Spell spell = entityData.get(SPELL).map(Pair::getFirst).orElse(null);
+        if (spell == null) {
+            return;
+        }
+        if (this.tickCount > spell.getDefinition().lifetimeTicks()) {
+            remove(RemovalReason.DISCARDED);
+        }
+    }
+
+    @Override
     public boolean hurtServer(@NonNull ServerLevel serverLevel, @NonNull DamageSource damageSource, float v) {
         return false;
     }
