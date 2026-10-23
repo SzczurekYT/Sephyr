@@ -15,17 +15,20 @@ import yt.szczurek.sephyr.spell.SpellDefinition;
 import yt.szczurek.sephyr.spell.SpellElement;
 import yt.szczurek.sephyr.spell.wind.WindBeamSpell;
 import yt.szczurek.sephyr.spell.wind.WindLeapSpell;
+import yt.szczurek.sephyr.spell.wind.WindShotSpell;
 
 import java.util.List;
 
 public class SephyrSpells {
     public static Holder<SpellDefinition<WindLeapSpell>> WIND_LEAP;
+    public static Holder<SpellDefinition<WindShotSpell>> WIND_SHOT;
     public static Holder<SpellDefinition<WindBeamSpell>> WIND_BEAM;
 
     public static final CommandDispatcher<SpellCtx> dispatcher = new CommandDispatcher<>();
 
     public static void register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells) {
         WIND_LEAP = register(spells, "wind_leap", new SpellDefinition<>(SpellElement.WIND, 6 * 20, WindLeapSpell.STREAM_CODEC, WindLeapSpell::buildNode));
+        WIND_SHOT = register(spells, "wind_shot", new SpellDefinition<>(SpellElement.WIND, -1, WindShotSpell.STREAM_CODEC, WindShotSpell::buildNode));
         WIND_BEAM = register(spells, "wind_beam", new SpellDefinition<>(SpellElement.WIND, 5 * 20, WindBeamSpell.STREAM_CODEC, WindBeamSpell::buildNode));
     }
 
