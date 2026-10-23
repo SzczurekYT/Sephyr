@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yt.szczurek.sephyr.attachment.CastWords;
 import yt.szczurek.sephyr.network.ServerNetworkHandler;
 import yt.szczurek.sephyr.registry.SephyrRegistries;
 import yt.szczurek.sephyr.spell.casting.ClientCastingManager;
@@ -23,6 +22,7 @@ public class Sephyr {
     public static void init(BalmRegistrars registrars) {
         SephyrRegistries.register(registrars);
         ServerNetworkHandler.register();
+        SephyrCommand.register();
     }
 
     public static void clientTick() {
