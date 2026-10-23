@@ -8,6 +8,8 @@ import yt.szczurek.sephyr.SeppleManager;
 
 public class SephyrClient {
     public static void clientInit(BalmClientRegistrars registrars) {
+        SephyrClientRegistries.register(registrars);
+
         SeppleManager.clientInit();
 
         ClientLifecycleCallback.ConnectedToServer.EVENT.register(_ -> SeppleManager.startSepple());
