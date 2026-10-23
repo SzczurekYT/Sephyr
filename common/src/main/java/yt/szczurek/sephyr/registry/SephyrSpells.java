@@ -13,20 +13,20 @@ import yt.szczurek.sephyr.spell.Spell;
 import yt.szczurek.sephyr.spell.SpellCtx;
 import yt.szczurek.sephyr.spell.SpellDefinition;
 import yt.szczurek.sephyr.spell.SpellElement;
-import yt.szczurek.sephyr.spell.wind.WindBeamEffect;
-import yt.szczurek.sephyr.spell.wind.WindLeapEffect;
+import yt.szczurek.sephyr.spell.wind.WindBeamSpell;
+import yt.szczurek.sephyr.spell.wind.WindLeapSpell;
 
 import java.util.List;
 
 public class SephyrSpells {
-    public static Holder<SpellDefinition<WindLeapEffect>> WIND_LEAP;
-    public static Holder<SpellDefinition<WindBeamEffect>> WIND_BEAM;
+    public static Holder<SpellDefinition<WindLeapSpell>> WIND_LEAP;
+    public static Holder<SpellDefinition<WindBeamSpell>> WIND_BEAM;
 
     public static final CommandDispatcher<SpellCtx> dispatcher = new CommandDispatcher<>();
 
     public static void register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells) {
-        WIND_LEAP = register(spells, "wind_leap", new SpellDefinition<>(SpellElement.WIND, WindLeapEffect.STREAM_CODEC, WindLeapEffect::buildNode));
-        WIND_BEAM = register(spells, "wind_beam", new SpellDefinition<>(SpellElement.WIND, WindBeamEffect.STREAM_CODEC, WindBeamEffect::buildNode));
+        WIND_LEAP = register(spells, "wind_leap", new SpellDefinition<>(SpellElement.WIND, WindLeapSpell.STREAM_CODEC, WindLeapSpell::buildNode));
+        WIND_BEAM = register(spells, "wind_beam", new SpellDefinition<>(SpellElement.WIND, WindBeamSpell.STREAM_CODEC, WindBeamSpell::buildNode));
     }
 
     private static <S extends Spell> Holder<SpellDefinition<S>> register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells, String name, SpellDefinition<S> spellDefinition) {

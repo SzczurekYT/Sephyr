@@ -15,8 +15,8 @@ import yt.szczurek.sephyr.entity.SpellEntity;
 import yt.szczurek.sephyr.registry.SephyrSpells;
 import yt.szczurek.sephyr.spell.*;
 
-public class WindLeapEffect extends Spell {
-    public static StreamCodec<ByteBuf, WindLeapEffect> STREAM_CODEC = supplierCodec(WindLeapEffect::new);
+public class WindLeapSpell extends Spell {
+    public static StreamCodec<ByteBuf, WindLeapSpell> STREAM_CODEC = supplierCodec(WindLeapSpell::new);
 
     @Override
     public SpellDefinition<?> getDefinition() {
@@ -59,7 +59,7 @@ public class WindLeapEffect extends Spell {
         SpellCtx spellCtx = ctx.getSource();
         spellCtx.castPos = spellCtx.castingEntity.position();
         spellCtx.castDirection = calculateLeapDirection(spellCtx, direction);
-        spellCtx.runSpell(new WindLeapEffect());
+        spellCtx.runSpell(new WindLeapSpell());
         return Command.SINGLE_SUCCESS;
     }
 

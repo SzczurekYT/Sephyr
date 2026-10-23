@@ -9,8 +9,8 @@ import yt.szczurek.sephyr.entity.SpellEntity;
 import yt.szczurek.sephyr.registry.SephyrSpells;
 import yt.szczurek.sephyr.spell.*;
 
-public class WindBeamEffect extends Spell {
-    public static StreamCodec<ByteBuf, WindBeamEffect> STREAM_CODEC = supplierCodec(WindBeamEffect::new);
+public class WindBeamSpell extends Spell {
+    public static StreamCodec<ByteBuf, WindBeamSpell> STREAM_CODEC = supplierCodec(WindBeamSpell::new);
 
     @Override
     public SpellDefinition<?> getDefinition() {
@@ -24,7 +24,7 @@ public class WindBeamEffect extends Spell {
 
     public static @NotNull CommandNode<SpellCtx> buildNode() {
         return literal(Words.CHARGE).executes(ctx -> {
-            ctx.getSource().runSpell(new WindBeamEffect());
+            ctx.getSource().runSpell(new WindBeamSpell());
             return Command.SINGLE_SUCCESS;
         }).build();
     }
