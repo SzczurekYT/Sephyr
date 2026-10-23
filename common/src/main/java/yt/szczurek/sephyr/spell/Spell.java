@@ -22,7 +22,9 @@ public abstract class Spell {
 
     public abstract SpellDefinition<?> getDefinition();
 
-    public abstract void run(SpellEntity spellEntity, RefSpellCtx ctx);
+    public void run(SpellEntity spellEntity, RefSpellCtx ctx) {}
 
     public void runClient(SpellEntity spellEntity, RefSpellCtx ctx) {}
+
+    public void tick(SpellEntity spellEntity, RefSpellCtx ctx) {}
 }

@@ -18,6 +18,7 @@ import org.jspecify.annotations.NonNull;
 import yt.szczurek.sephyr.registry.SephyrEntities;
 import yt.szczurek.sephyr.spell.RefSpellCtx;
 import yt.szczurek.sephyr.spell.Spell;
+import yt.szczurek.sephyr.spell.SpellDefinition;
 
 import java.util.Optional;
 
@@ -70,12 +71,22 @@ public class SpellEntity extends Entity {
 
     @Override
     public void tick() {
-        Spell spell = entityData.get(SPELL).map(Pair::getFirst).orElse(null);
-        if (spell == null) {
+        Optional<Pair<Spell, RefSpellCtx>> pair = entityData.get(SPELL);
+        if (pair.isEmpty()) {
             return;
         }
-        if (this.tickCount > spell.getDefinition().lifetimeTicks()) {
+        Spell spell = pair.get().getFirst();
+        SpellDefinition<?> definition = spell.getDefinition();
+        if (this.tickCount > definition.lifetimeTicks()) {
             remove(RemovalReason.DISCARDED);
+            return;
+        }
+        if (level().isClientSide()) {
+            return;
+        }
+        RefSpellCtx ctx = pair.get().getSecond();
+        if (definition.ticking()) {
+            spell.tick(this, ctx);
         }
     }
 

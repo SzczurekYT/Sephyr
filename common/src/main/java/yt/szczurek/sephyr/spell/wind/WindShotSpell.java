@@ -15,9 +15,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import yt.szczurek.sephyr.entity.SpellEntity;
 import yt.szczurek.sephyr.registry.SephyrSpells;
-import yt.szczurek.sephyr.spell.*;
+import yt.szczurek.sephyr.spell.Spell;
+import yt.szczurek.sephyr.spell.SpellCtx;
+import yt.szczurek.sephyr.spell.SpellDefinition;
+import yt.szczurek.sephyr.spell.Words;
 
 public class WindShotSpell extends Spell {
     public static StreamCodec<ByteBuf, WindShotSpell> STREAM_CODEC = supplierCodec(WindShotSpell::new);
@@ -25,11 +27,6 @@ public class WindShotSpell extends Spell {
     @Override
     public SpellDefinition<?> getDefinition() {
         return SephyrSpells.WIND_SHOT.value();
-    }
-
-    @Override
-    public void run(SpellEntity spellEntity, RefSpellCtx ctx) {
-
     }
 
     public static @NotNull CommandNode<SpellCtx> buildNode() {
