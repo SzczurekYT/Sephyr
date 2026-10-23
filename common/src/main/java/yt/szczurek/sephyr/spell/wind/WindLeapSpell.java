@@ -1,5 +1,8 @@
 package yt.szczurek.sephyr.spell.wind;
 
+import com.lowdragmc.photon.client.fx.EntityEffectExecutor;
+import com.lowdragmc.photon.client.fx.FX;
+import com.lowdragmc.photon.client.fx.FXHelper;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
@@ -8,9 +11,13 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
+import yt.szczurek.sephyr.Sephyr;
 import yt.szczurek.sephyr.entity.SpellEntity;
 import yt.szczurek.sephyr.registry.SephyrSpells;
 import yt.szczurek.sephyr.spell.*;
@@ -34,6 +41,18 @@ public class WindLeapSpell extends Spell {
 
         if (caster instanceof ServerPlayer player) {
             player.connection.send(new ClientboundSetEntityMotionPacket(player));
+        }
+    }
+
+    @Override
+    public void runClient(SpellEntity spellEntity, RefSpellCtx ctx) {
+        super.runClient(spellEntity, ctx);
+        Level level = spellEntity.level();
+        FX fx = FXHelper.getFX(Sephyr.identifier("leap"));
+        if (fx != null) {
+            EntityEffectExecutor executor = new EntityEffectExecutor(fx, level, spellEntity, EntityEffectExecutor.AutoRotate.NONE);
+            executor.setRotation(new Quaternionf().rotationTo(new Vector3f(0.0f, 0.0f, -1.0f), ctx.castDirection().reverse().toVector3f()));
+            executor.start();
         }
     }
 
