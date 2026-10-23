@@ -1,6 +1,7 @@
 package yt.szczurek.sephyr.entity;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -38,6 +39,7 @@ public class SpellEntity extends Entity {
     public SpellEntity(Level level, RefSpellCtx ctx, Spell spell) {
         super(SephyrEntities.SPELL.value(), level);
         setPos(ctx.castPos());
+        lookAt(EntityAnchorArgument.Anchor.EYES, ctx.castPos().add(ctx.castDirection()));
         entityData.set(SPELL, Optional.of(new Pair<>(spell, ctx)));
     }
 
