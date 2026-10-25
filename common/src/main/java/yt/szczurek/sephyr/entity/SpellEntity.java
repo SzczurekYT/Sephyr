@@ -84,11 +84,13 @@ public class SpellEntity extends Entity {
             remove(RemovalReason.DISCARDED);
             return;
         }
-        if (level().isClientSide()) {
+        RefSpellCtx ctx = pair.get().getSecond();
+        if (!definition.ticking()) {
             return;
         }
-        RefSpellCtx ctx = pair.get().getSecond();
-        if (definition.ticking()) {
+        if (level().isClientSide()) {
+            spell.clientTick(this, ctx);
+        } else {
             spell.tick(this, ctx);
         }
     }

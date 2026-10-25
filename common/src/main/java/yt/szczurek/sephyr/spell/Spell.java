@@ -25,4 +25,6 @@ public abstract class Spell {
     public void runClient(SpellEntity spellEntity, RefSpellCtx ctx) {}
 
     public void tick(SpellEntity spellEntity, RefSpellCtx ctx) {}
+
+    public void clientTick(SpellEntity spellEntity, RefSpellCtx ctx) {}
 }
