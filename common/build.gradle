@@ -33,6 +33,8 @@ dependencies {
     implementation("com.lowdragmc.photon:photon-neoforge-26.1:${photon_version}") {
         transitive = false
     }
+    // Photon use NeoForge classes, so this is needed to compile
+    compileOnly "net.neoforged:neoforge:${neoforge_version}"
 }
 
 neoForge {
