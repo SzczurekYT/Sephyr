@@ -11,9 +11,10 @@ import java.util.List;
 public class Words {
     public static final String SELF = "ɛvi";
     public static final String SHOT = "wˈanga";
-    public static final String CHARGE = "ɛkɐsuɾɯ";
+    public static final String CHARGE = "ˈdɪrɛka";
     public static final String CONJURE = "jɑːkɾidɔ";
     public static final String BLOW = "vɛɾtɛɾ";
+    public static final String EXPAND = "ɛkɐsuɾɯ";
     public static final String FORWARD = "ˈɔnːdˌɔː";
     public static final String REVERSE = "ãntikɔ";
     public static final String UP = "fɒksɑm";

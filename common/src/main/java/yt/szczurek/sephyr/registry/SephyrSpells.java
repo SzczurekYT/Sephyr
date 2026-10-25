@@ -3,10 +3,8 @@ package yt.szczurek.sephyr.registry;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.blay09.mods.balm.Balm;
 import net.blay09.mods.balm.core.BalmRegistrar;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import yt.szczurek.sephyr.Sephyr;
 import yt.szczurek.sephyr.SpellCastAttemptResult;
@@ -39,7 +37,7 @@ public class SephyrSpells {
         );
         WIND_BEAM = register(spells, "wind_beam",
                 new SpellDefinition.Builder<>(SpellElement.WIND, WindBeamSpell.CODEC, WindBeamSpell::buildNode)
-                        .lifetime(5 * 20)
+                        .lifetime(WindBeamSpell.DURATION_TICKS)
                         .ticking()
                         .build()
         );

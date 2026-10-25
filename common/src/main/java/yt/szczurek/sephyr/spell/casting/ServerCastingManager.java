@@ -18,7 +18,6 @@ public class ServerCastingManager {
         }
         if (word.equals(Words.WIND)) {
             entity.level().playSound(null, entity.blockPosition(), SephyrSounds.SPELL_START_WIND.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
-            entity.level().playSound(null, entity.blockPosition(), SephyrSounds.SPELL_RUNNING_WIND.value(), SoundSource.PLAYERS, 1.0F, 1.0F);
         }
 
         CastWords.add(entity, word);
