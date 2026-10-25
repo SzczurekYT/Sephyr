@@ -8,6 +8,7 @@ import net.blay09.mods.balm.core.BalmRegistrar;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
+import yt.szczurek.sephyr.Sephyr;
 import yt.szczurek.sephyr.SpellCastAttemptResult;
 import yt.szczurek.sephyr.spell.Spell;
 import yt.szczurek.sephyr.spell.SpellCtx;
@@ -56,16 +57,13 @@ public class SephyrSpells {
         SpellCtx ctx = SpellCtx.fromEntity(entity);
         ParseResults<SpellCtx> result = dispatcher.parse(spellString, ctx);
 
-
-        if (Balm.platform().isDevelopmentEnvironment()) {
-            String msg;
-            if (force) {
-                msg = "DEBUG: force trying: " + spellString;
-            } else {
-                msg = "DEBUG: trying: " + spellString;
-            }
-            entity.level().getServer().getPlayerList().broadcastSystemMessage(Component.literal(msg), false);
+        String msg;
+        if (force) {
+            msg = "DEBUG: force trying: " + spellString;
+        } else {
+            msg = "DEBUG: trying: " + spellString;
         }
+        Sephyr.LOG.debug(msg);
 
         if (!result.getExceptions().isEmpty()) {
             return SpellCastAttemptResult.INVALID;
