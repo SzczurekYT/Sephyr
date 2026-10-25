@@ -33,6 +33,8 @@ public class SpellEntity extends Entity {
     public static final EntityDataAccessor<Optional<Pair<Spell, RefSpellCtx>>> SPELL =
             SynchedEntityData.defineId(SpellEntity.class, SPELL_SERIALIZER);
 
+    private boolean hasStarted = false;
+
     public SpellEntity(EntityType<?> type, Level level) {
         super(type, level);
     }
@@ -57,9 +59,10 @@ public class SpellEntity extends Entity {
         }
 
         Optional<Pair<Spell, RefSpellCtx>> pair = entityData.get(SPELL);
-        if (pair.isEmpty()) {
+        if (hasStarted || pair.isEmpty()) {
             return;
         }
+        hasStarted = true;
         Spell spell = pair.get().getFirst();
         RefSpellCtx ctx = pair.get().getSecond();
         if (this.level().isClientSide()) {
@@ -97,11 +100,11 @@ public class SpellEntity extends Entity {
 
     @Override
     protected void readAdditionalSaveData(@NonNull ValueInput valueInput) {
-
+        hasStarted = valueInput.getBooleanOr("HasStarted", false);
     }
 
     @Override
     protected void addAdditionalSaveData(@NonNull ValueOutput valueOutput) {
-
+        valueOutput.putBoolean("HasStarted", hasStarted);
     }
 }
