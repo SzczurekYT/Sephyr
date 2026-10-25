@@ -45,6 +45,11 @@ neoForge {
             client()
             gameDirectory = this.mkdir(this.file('runs/client'))
         }
+        client2 {
+            client()
+            gameDirectory = this.mkdir(this.file('runs/client'))
+            programArguments = ["--username", "Dev2"]
+        }
         data {
             clientData()
             gameDirectory = this.mkdir(this.file('runs/data'))
