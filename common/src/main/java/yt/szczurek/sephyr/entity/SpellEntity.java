@@ -1,9 +1,10 @@
 package yt.szczurek.sephyr.entity;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -23,13 +24,12 @@ import yt.szczurek.sephyr.spell.SpellDefinition;
 import java.util.Optional;
 
 public class SpellEntity extends Entity {
+    public static Codec<Pair<Spell, RefSpellCtx>> SPELL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Spell.DISPATCH_CODEC.fieldOf("Spell").forGetter(Pair::getFirst),
+            RefSpellCtx.CODEC.fieldOf("Ctx").forGetter(Pair::getSecond)
+    ).apply(instance, Pair::new));
     public static final EntityDataSerializer<Optional<Pair<Spell, RefSpellCtx>>> SPELL_SERIALIZER = EntityDataSerializer.forValueType(
-            StreamCodec.composite(
-                            Spell.DISPATCH_CODEC, Pair::getFirst,
-                            RefSpellCtx.STREAM_CODEC, (Pair<Spell, RefSpellCtx> p) -> p.getSecond(),
-                            Pair::new)
-                    .apply(ByteBufCodecs::optional)
-    );
+            ByteBufCodecs.fromCodec(SPELL_CODEC).apply(ByteBufCodecs::optional));
     public static final EntityDataAccessor<Optional<Pair<Spell, RefSpellCtx>>> SPELL =
             SynchedEntityData.defineId(SpellEntity.class, SPELL_SERIALIZER);
 
@@ -101,10 +101,13 @@ public class SpellEntity extends Entity {
     @Override
     protected void readAdditionalSaveData(@NonNull ValueInput valueInput) {
         hasStarted = valueInput.getBooleanOr("HasStarted", false);
+        entityData.set(SPELL, valueInput.read("Spell", SPELL_CODEC));
     }
 
     @Override
     protected void addAdditionalSaveData(@NonNull ValueOutput valueOutput) {
         valueOutput.putBoolean("HasStarted", hasStarted);
+        Optional<Pair<Spell, RefSpellCtx>> spellPair = entityData.get(SPELL);
+        spellPair.ifPresent(pair -> valueOutput.store("Spell", SPELL_CODEC, pair));
     }
 }

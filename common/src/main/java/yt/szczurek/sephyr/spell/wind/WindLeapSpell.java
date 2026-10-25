@@ -6,6 +6,7 @@ import com.lowdragmc.photon.client.fx.FXHelper;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.serialization.MapCodec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -23,7 +24,7 @@ import yt.szczurek.sephyr.registry.SephyrSpells;
 import yt.szczurek.sephyr.spell.*;
 
 public class WindLeapSpell extends Spell {
-    public static StreamCodec<ByteBuf, WindLeapSpell> STREAM_CODEC = supplierCodec(WindLeapSpell::new);
+    public static MapCodec<WindLeapSpell> CODEC = MapCodec.unit(WindLeapSpell::new);
 
     @Override
     public SpellDefinition<?> getDefinition() {

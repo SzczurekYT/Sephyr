@@ -1,5 +1,7 @@
 package yt.szczurek.sephyr.spell;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -20,15 +22,14 @@ public record RefSpellCtx(
         @Nullable EntityReference<Entity> targetEntity,
         @Nullable BlockPos targetPos
 ) {
-    public static StreamCodec<ByteBuf, RefSpellCtx> STREAM_CODEC =
-            StreamCodec.composite(EntityReference.streamCodec(), RefSpellCtx::castingEntity,
-                    Vec3.STREAM_CODEC, RefSpellCtx::castPos,
-                    Vec3.STREAM_CODEC, RefSpellCtx::castDirection,
-                    EntityReference.<Entity>streamCodec().apply(ByteBufCodecs::optional), (RefSpellCtx ctx) -> Optional.ofNullable(ctx.targetEntity()),
-                    BlockPos.STREAM_CODEC.apply(ByteBufCodecs::optional), (RefSpellCtx ctx) -> Optional.ofNullable(ctx.targetPos()),
-                    RefSpellCtx::fromOptionals
-            );
-
+    public static Codec<RefSpellCtx> CODEC =
+            RecordCodecBuilder.create(instance -> instance.group(
+                    EntityReference.<Entity>codec().fieldOf("Caster").forGetter(RefSpellCtx::castingEntity),
+                    Vec3.CODEC.fieldOf("Pos").forGetter(RefSpellCtx::castPos),
+                    Vec3.CODEC.fieldOf("Direction").forGetter(RefSpellCtx::castDirection),
+                    EntityReference.<Entity>codec().optionalFieldOf("TargetEntity").forGetter(o -> Optional.ofNullable(o.targetEntity)),
+                    BlockPos.CODEC.optionalFieldOf("TargetPos").forGetter(refSpellCtx -> Optional.ofNullable(refSpellCtx.targetPos))
+            ).apply(instance, RefSpellCtx::fromOptionals));
     // We want them as params, so it matches StreamCodec.composite signature
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static RefSpellCtx fromOptionals(

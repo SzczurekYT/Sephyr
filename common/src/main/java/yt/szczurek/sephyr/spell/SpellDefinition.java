@@ -2,9 +2,8 @@ package yt.szczurek.sephyr.spell;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.NotNull;
 import yt.szczurek.sephyr.registry.SephyrRegistries;
 
@@ -14,25 +13,25 @@ public record SpellDefinition<S extends Spell>(
         SpellElement element,
         int lifetimeTicks,
         boolean ticking,
-        StreamCodec<? super RegistryFriendlyByteBuf, S> streamCodec,
+        MapCodec<S> codec,
         LiteralArgumentBuilder<SpellCtx> node
 ) {
-    public static final StreamCodec<RegistryFriendlyByteBuf, SpellDefinition<?>> STREAM_CODEC = ByteBufCodecs.registry(SephyrRegistries.SPELL_REGISTRY_KEY);
+    public static final Codec<SpellDefinition<?>> CODEC = Codec.lazyInitialized(() -> SephyrRegistries.SPELL.byNameCodec());
 
     public static class Builder<S extends Spell> {
         SpellElement element;
         int lifetimeTicks = -1;
         boolean ticking = false;
-        StreamCodec<? super RegistryFriendlyByteBuf, S> streamCodec;
+        MapCodec<S> codec;
         LiteralArgumentBuilder<SpellCtx> node;
 
         public Builder(
                 @NotNull SpellElement element,
-                @NotNull StreamCodec<? super RegistryFriendlyByteBuf, S> streamCodec,
+                @NotNull MapCodec<S> codec,
                 @NotNull Supplier<CommandNode<SpellCtx>> nodeFactory
         ) {
             this.element = element;
-            this.streamCodec = streamCodec;
+            this.codec = codec;
             this.node = Spell.literal(element.word()).then(nodeFactory.get());
         }
 
@@ -47,7 +46,7 @@ public record SpellDefinition<S extends Spell>(
         }
 
         public SpellDefinition<S> build() {
-            return new SpellDefinition<>(element, lifetimeTicks, ticking, streamCodec, node);
+            return new SpellDefinition<>(element, lifetimeTicks, ticking, codec, node);
         }
     }
 }

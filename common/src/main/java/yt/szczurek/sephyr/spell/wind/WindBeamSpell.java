@@ -2,8 +2,7 @@ package yt.szczurek.sephyr.spell.wind;
 
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import com.mojang.serialization.MapCodec;
 import org.jetbrains.annotations.NotNull;
 import yt.szczurek.sephyr.registry.SephyrSpells;
 import yt.szczurek.sephyr.spell.Spell;
@@ -12,7 +11,7 @@ import yt.szczurek.sephyr.spell.SpellDefinition;
 import yt.szczurek.sephyr.spell.Words;
 
 public class WindBeamSpell extends Spell {
-    public static StreamCodec<ByteBuf, WindBeamSpell> STREAM_CODEC = supplierCodec(WindBeamSpell::new);
+    public static MapCodec<WindBeamSpell> CODEC = MapCodec.unit(WindBeamSpell::new);
 
     @Override
     public SpellDefinition<?> getDefinition() {

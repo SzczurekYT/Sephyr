@@ -28,16 +28,16 @@ public class SephyrSpells {
 
     public static void register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells) {
         WIND_LEAP = register(spells, "wind_leap",
-                new SpellDefinition.Builder<>(SpellElement.WIND, WindLeapSpell.STREAM_CODEC, WindLeapSpell::buildNode)
+                new SpellDefinition.Builder<>(SpellElement.WIND, WindLeapSpell.CODEC, WindLeapSpell::buildNode)
                         .lifetime(6 * 20)
                         .build()
         );
         WIND_SHOT = register(spells, "wind_shot",
-                new SpellDefinition.Builder<>(SpellElement.WIND, WindShotSpell.STREAM_CODEC, WindShotSpell::buildNode)
+                new SpellDefinition.Builder<>(SpellElement.WIND, WindShotSpell.CODEC, WindShotSpell::buildNode)
                         .build()
         );
         WIND_BEAM = register(spells, "wind_beam",
-                new SpellDefinition.Builder<>(SpellElement.WIND, WindBeamSpell.STREAM_CODEC, WindBeamSpell::buildNode)
+                new SpellDefinition.Builder<>(SpellElement.WIND, WindBeamSpell.CODEC, WindBeamSpell::buildNode)
                         .lifetime(5 * 20)
                         .ticking()
                         .build()
