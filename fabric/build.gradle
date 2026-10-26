@@ -20,6 +20,13 @@ dependencies {
     implementation project(":sepple")
     include project(":sepple")
 
+    // Needed by Sepple
+    include "com.fasterxml.jackson.core:jackson-core:${project.jackson_version}"
+    include "com.fasterxml.jackson.core:jackson-databind:${project.jackson_version}"
+    include "com.fasterxml.jackson.core:jackson-annotations:${project.jackson_version}"
+    include "io.github.astonbitecode:j4rs:${project.j4rs_version}"
+    include "at.yawk.lz4:lz4-java:${project.lz4_version}"
+
     implementation("net.blay09.mods:balm-fabric:${balm_version}") {
         changing = balm_version.contains('SNAPSHOT')
     }

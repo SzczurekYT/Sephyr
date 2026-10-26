@@ -4,6 +4,7 @@ plugins {
 }
 
 repositories {
+    mavenCentral()
     maven {
         url = 'https://maven.twelveiterations.com/repository/maven-public/'
         content {
@@ -16,6 +17,13 @@ repositories {
 dependencies {
     implementation project(":sepple")
     jarJar project(":sepple")
+
+    // Needed by Sepple
+    jarJar "com.fasterxml.jackson.core:jackson-core:${project.jackson_version}"
+    jarJar "com.fasterxml.jackson.core:jackson-databind:${project.jackson_version}"
+    jarJar "com.fasterxml.jackson.core:jackson-annotations:${project.jackson_version}"
+    jarJar "io.github.astonbitecode:j4rs:${project.j4rs_version}"
+    jarJar "at.yawk.lz4:lz4-java:${project.lz4_version}"
 
     implementation("net.blay09.mods:balm-neoforge:${balm_version}") {
         changing = balm_version.contains('SNAPSHOT')
