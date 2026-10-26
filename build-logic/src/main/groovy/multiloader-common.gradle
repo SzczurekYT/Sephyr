@@ -51,7 +51,8 @@ processResources {
             'neoforge_loader_version_range': neoforge_loader_version_range,
             'credits'                      : credits,
             'java_version'                 : java_version,
-            'balm_version'                 : balm_version
+            'balm_version'                 : balm_version,
+            'photon_version'               : photon_version
     ]
 
     var jsonExpandProps = expandProps.collectEntries {

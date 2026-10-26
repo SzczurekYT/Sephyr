@@ -1,7 +1,7 @@
 modLoader = "javafml" #mandatory
 loaderVersion = "${neoforge_loader_version_range}" #mandatory
 license = "${license}" # Review your options at https://choosealicense.com/.
-#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+issueTrackerURL="https://github.com/SzczurekYT/Sephyr/issues"
 [[mods]] #mandatory
 modId = "${mod_id}" #mandatory
 version = "${version}" #mandatory
@@ -32,6 +32,12 @@ side = "BOTH"
 modId="balm"
 mandatory=true
 versionRange="[${balm_version},)"
+ordering="NONE"
+side="BOTH"
+[[dependencies."${mod_id}"]]
+modId="photon"
+mandatory=true
+versionRange="[${photon_version},)"
 ordering="NONE"
 side="BOTH"
 

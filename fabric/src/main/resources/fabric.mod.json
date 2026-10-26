@@ -8,8 +8,8 @@
     "${mod_author}"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://modrinth.com/project/sephyr/",
+    "sources": "https://github.com/SzczurekYT/Sephyr/"
   },
   "license": "${license}",
   "icon": "${mod_id}.png",
@@ -31,7 +31,8 @@
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "java": ">=${java_version}",
-    "balm-fabric": ">=${balm_version}"
+    "balm-fabric": ">=${balm_version}",
+    "photon": ">=${photon_version}"
   },
   "suggests": {
     "another-mod": "*"
