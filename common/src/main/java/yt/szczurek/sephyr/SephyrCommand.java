@@ -42,7 +42,10 @@ public class SephyrCommand {
         if (command != null) {
             base.executes(context -> {
                 // Skips two words - the "sephyr cast" prefix
-                List<String> spell = Arrays.stream(context.getInput().split(" ")).skip(2).toList();
+                List<String> spell = Arrays.stream(context.getInput().split(" "))
+                        .dropWhile(s -> !s.equals("sephyr"))
+                        .skip(2)
+                        .toList();
                 SpellCastAttemptResult result = SephyrSpells.tryExecute(spell, context.getSource().getEntity(), true);
                 return result == SpellCastAttemptResult.EXECUTED ? Command.SINGLE_SUCCESS : 0;
             });
