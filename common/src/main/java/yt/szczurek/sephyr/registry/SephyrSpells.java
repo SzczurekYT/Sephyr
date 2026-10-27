@@ -28,7 +28,8 @@ public class SephyrSpells {
     public static void register(BalmRegistrar.Scoped<SpellDefinition<? extends Spell>> spells) {
         WIND_LEAP = register(spells, "wind_leap",
                 new SpellDefinition.Builder<>(SpellElement.WIND, WindLeapSpell.CODEC, WindLeapSpell::buildNode)
-                        .lifetime(6 * 20)
+                        .lifetime(WindLeapSpell.DURATION_TICKS)
+                        .ticking()
                         .build()
         );
         WIND_SHOT = register(spells, "wind_shot",

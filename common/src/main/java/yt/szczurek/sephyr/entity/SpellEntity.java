@@ -103,12 +103,14 @@ public class SpellEntity extends Entity {
     @Override
     protected void readAdditionalSaveData(@NonNull ValueInput valueInput) {
         hasStarted = valueInput.getBooleanOr("HasStarted", false);
+        tickCount = valueInput.getIntOr("Age", 0);
         entityData.set(SPELL, valueInput.read("Spell", SPELL_CODEC));
     }
 
     @Override
     protected void addAdditionalSaveData(@NonNull ValueOutput valueOutput) {
         valueOutput.putBoolean("HasStarted", hasStarted);
+        valueOutput.putInt("Age", this.tickCount);
         Optional<Pair<Spell, RefSpellCtx>> spellPair = entityData.get(SPELL);
         spellPair.ifPresent(pair -> valueOutput.store("Spell", SPELL_CODEC, pair));
     }
