@@ -1,22 +1,19 @@
 use std::{path::PathBuf, sync::atomic::Ordering, time::Duration};
 
 use sepple::{
+    configs::PreconfiguredPipelineParts,
     dictionary::Dictionary,
     error::SeppleError,
     model_provider,
     pipeline::{
         Pipeline,
         processor::{
-            chunker::AudioChunker,
             ipa_processor::IpaProcessor,
             silero_vad_scorer::SileroVadScorer,
-            sliding_window::{SlidingWindowChunker, SlidingWindowConfig},
-            vad_filter::VadFilter,
-            word_detector::WordDetector,
+            word_detector::{DetectedWord, WordDetector},
         },
         producer::capture::AudioCapture,
     },
-    vad,
 };
 use tokio::{
     runtime::{self},
@@ -26,7 +23,7 @@ use tokio::{
 use crate::{consumer::Consumer, jni::SHOULD_STOP};
 
 pub struct Sepple {
-    pipeline: Pipeline<String>,
+    pipeline: Pipeline<DetectedWord>,
 }
 
 impl Sepple {
@@ -47,24 +44,23 @@ impl Sepple {
 
         on_model_loading.accept(());
 
-        let sliding_window_config = SlidingWindowConfig {
-            window_size: Duration::from_millis(1000),
-            cut_left: Duration::from_millis(150),
-            cut_right: Duration::from_millis(150),
-        };
+        let PreconfiguredPipelineParts {
+            audio_chunker,
+            sliding_window_config,
+            vad_filter,
+            sliding_window_chunker,
+        } = PreconfiguredPipelineParts::default();
+
         let vad_scorer = SileroVadScorer::init();
 
         let ipa_processor = IpaProcessor::init(model_path, &sliding_window_config)?;
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
         let pipeline = Pipeline::new(AudioCapture::new()?)
-            .then(AudioChunker::new(vad::CHUNK_SIZE))
+            .then(audio_chunker)
             .then(vad_scorer)
-            .then(VadFilter::new(0.35, 0.35, 10))
-            .then(SlidingWindowChunker::new(
-                &sliding_window_config,
-                &Duration::from_millis(40),
-            ))
+            .then(vad_filter)
+            .then(sliding_window_chunker)
             .then(ipa_processor)
             .then(word_detector);
 
@@ -82,7 +78,7 @@ impl Sepple {
         let future = async {
             loop {
                 match timeout(Duration::from_millis(250), receiver.recv()).await {
-                    Ok(Some(word)) => callback.accept(word),
+                    Ok(Some(word)) => callback.accept(word.word),
                     Ok(None) => break,
                     Err(_) => {
                         if SHOULD_STOP
