@@ -3,8 +3,10 @@ package yt.szczurek.sepple;
 
 import org.astonbitecode.j4rs.api.Instance;
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils;
+import org.astonbitecode.j4rs.utils.Utils;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -12,6 +14,14 @@ import java.util.function.Consumer;
 public class Sepple {
 
     public static boolean init(@Nullable String modelPath, @Nullable String microphoneId, List<String> dictionary, ProgressCallback progressCallback, ModelLoadingCallback modelLoadingCallback) {
+        try {
+            Field isAndroidField = Utils.class.getDeclaredField("IsAndroid");
+            isAndroidField.setAccessible(true);
+            isAndroidField.set(null, true);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
         if (modelPath == null) {
             modelPath = "";
         }
