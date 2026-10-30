@@ -14,6 +14,7 @@ public class Sephyr {
     public static final String MOD_ID = "sephyr";
     public static final String MOD_NAME = "Sephyr";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
+    public static final int BLUE_COLOR = 0xff768fff;
 
     public static Identifier identifier(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);

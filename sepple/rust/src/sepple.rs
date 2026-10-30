@@ -1,4 +1,8 @@
-use std::{path::PathBuf, sync::atomic::Ordering, time::Duration};
+use std::{
+    path::PathBuf,
+    sync::{Arc, Mutex, atomic::Ordering},
+    time::Duration,
+};
 
 use sepple::{
     configs::PreconfiguredPipelineParts,
@@ -12,7 +16,7 @@ use sepple::{
             silero_vad_scorer::SileroVadScorer,
             word_detector::{DetectedWord, WordDetector},
         },
-        producer::capture::AudioCapture,
+        producer::capture::{AudioCapture, AudioCaptureController},
     },
 };
 use tokio::{
@@ -29,10 +33,11 @@ pub struct Sepple {
 impl Sepple {
     pub fn init(
         model_path: &str,
+        microphone_id: Option<String>,
         dictionary: Vec<String>,
         progress_consumer: &Consumer<(u64, Option<u64>)>,
         on_model_loading: &Consumer<()>,
-    ) -> Result<Self, SeppleError> {
+    ) -> Result<(Self, Arc<Mutex<AudioCaptureController>>), SeppleError> {
         let model_path: PathBuf = if model_path.is_empty() {
             let progress_callback = |downloaded: u64, total: Option<u64>| {
                 progress_consumer.accept((downloaded, total));
@@ -56,7 +61,10 @@ impl Sepple {
         let ipa_processor = IpaProcessor::init(model_path, &sliding_window_config)?;
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
-        let pipeline = Pipeline::new(AudioCapture::new()?)
+        let audio_capture = AudioCapture::new(microphone_id)?;
+        let audio_controller = audio_capture.controller();
+
+        let pipeline = Pipeline::new(audio_capture)
             .then(audio_chunker)
             .then(vad_scorer)
             .then(vad_filter)
@@ -64,7 +72,7 @@ impl Sepple {
             .then(ipa_processor)
             .then(word_detector);
 
-        Ok(Sepple { pipeline })
+        Ok((Sepple { pipeline }, audio_controller))
     }
 
     pub fn run(self, callback: &Consumer<String>) {

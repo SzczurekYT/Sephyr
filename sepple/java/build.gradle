@@ -220,4 +220,5 @@ repositories {
 dependencies {
     implementation "io.github.astonbitecode:j4rs:${project.j4rs_version}"
     implementation "at.yawk.lz4:lz4-java:${project.lz4_version}"
+    compileOnly "org.jetbrains:annotations:${project.jetbrains_annotations_version}"
 }

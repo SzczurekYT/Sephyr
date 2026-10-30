@@ -1,5 +1,6 @@
 package yt.szczurek.sephyr;
 
+import net.blay09.mods.balm.Balm;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.Toast;
@@ -7,12 +8,15 @@ import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.slf4j.event.Level;
+import yt.szczurek.sephyr.client.SephyrClientConfig;
 import yt.szczurek.sephyr.spell.Words;
 import yt.szczurek.sephyr.spell.casting.ClientCastingManager;
 import yt.szczurek.sephyr.toast.ModelDownloadToast;
 import yt.szczurek.sepple.ModelLoadingCallback;
 import yt.szczurek.sepple.ProgressCallback;
 import yt.szczurek.sepple.Sepple;
+
+import java.util.Objects;
 
 public class SeppleManager {
 
@@ -54,9 +58,14 @@ public class SeppleManager {
     }
 
     private static void initSepple() {
+        SephyrClientConfig config = Objects.requireNonNull(
+                Balm.config().getActiveConfig(SephyrClientConfig.class),
+                "init should only be called after config is loaded"
+        );
         // Model path can be overridden here for development if needed
         boolean success = Sepple.init(
                 null,
+                config.microphoneId,
                 Words.getList(),
                 new ProgressCallback(SeppleManager::onDownloadProgress),
                 new ModelLoadingCallback(SeppleManager::onModelLoadingNotification)
@@ -134,10 +143,22 @@ public class SeppleManager {
         SystemToast.forceHide(Minecraft.getInstance().getToastManager(), LOADING_TOAST_ID);
     }
 
-    enum SeppleLoadState {
+    public enum SeppleLoadState {
         LOADING,
         DOWNLOADING,
         FAILED,
         FINISHED
+    }
+
+    public static SeppleLoadState loadingState() {
+        return seppleLoadState;
+    }
+
+    public static boolean setMicrophone(String microphoneId) {
+        boolean success = Sepple.setMicrophone(microphoneId);
+        if (success) {
+            Balm.config().updateLocalConfig(SephyrClientConfig.class, config -> config.microphoneId = microphoneId);
+        }
+        return success;
     }
 }

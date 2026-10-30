@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -19,11 +20,15 @@ public class SeppleBinding {
     private static final String LIB_NAME = "sepple_java";
     public static final String NATIVE_NAME = getNativeName();
 
-    protected static native Instance<Boolean> init(Instance<String> path, Instance<List<String>> dictionary, Instance<ProgressCallback> progressCallback, Instance<ModelLoadingCallback> modelLoadingCallback);
+    protected static native Instance<Boolean> init(Instance<String> path, Instance<String> microphoneId, Instance<List<String>> dictionary, Instance<ProgressCallback> progressCallback, Instance<ModelLoadingCallback> modelLoadingCallback);
     protected static native void run(Instance<WordCallback> callback);
     protected static native void stop();
     protected static native Instance<Boolean> isRunning();
     protected static native void setupLogging(Instance<LogCallback> callback);
+    protected static native Instance<List<Microphone>> enumerateMicrophones();
+    protected static native Instance<Boolean> setMicrophone(Instance<String> id);
+    protected static native Instance<Microphone> getCurrentMicrophone();
+
 
     static {
         loadLibrary();

@@ -3,6 +3,7 @@ package yt.szczurek.sepple;
 
 import org.astonbitecode.j4rs.api.Instance;
 import org.astonbitecode.j4rs.api.java2rust.Java2RustUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -10,11 +11,14 @@ import java.util.function.Consumer;
 
 public class Sepple {
 
-    public static boolean init(String modelPath, List<String> dictionary, ProgressCallback progressCallback, ModelLoadingCallback modelLoadingCallback) {
+    public static boolean init(@Nullable String modelPath, @Nullable String microphoneId, List<String> dictionary, ProgressCallback progressCallback, ModelLoadingCallback modelLoadingCallback) {
         if (modelPath == null) {
             modelPath = "";
         }
-        Instance<Boolean> result = SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(dictionary), Java2RustUtils.createInstance(progressCallback), Java2RustUtils.createInstance(modelLoadingCallback));
+        if (microphoneId == null) {
+            microphoneId = "";
+        }
+        Instance<Boolean> result = SeppleBinding.init(Java2RustUtils.createInstance(modelPath), Java2RustUtils.createInstance(microphoneId), Java2RustUtils.createInstance(dictionary), Java2RustUtils.createInstance(progressCallback), Java2RustUtils.createInstance(modelLoadingCallback));
         return Java2RustUtils.getObjectCasted(result);
     }
 
@@ -33,5 +37,18 @@ public class Sepple {
 
     public static void setupLogging(BiConsumer<String, Boolean> callback) {
         SeppleBinding.setupLogging(Java2RustUtils.createInstance(new LogCallback(callback)));
+    }
+
+    public static List<Microphone> enumerateMicrophones() {
+        return Java2RustUtils.getObjectCasted(SeppleBinding.enumerateMicrophones());
+    }
+
+    public static boolean setMicrophone(String id) {
+        Instance<Boolean> result = SeppleBinding.setMicrophone(Java2RustUtils.createInstance(id));
+        return Java2RustUtils.getObjectCasted(result);
+    }
+
+    public static @Nullable Microphone getCurrentMicrophone() {
+        return Java2RustUtils.getObjectCasted(SeppleBinding.getCurrentMicrophone());
     }
 }
