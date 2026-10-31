@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Fixed
+- Reversed wind beam no longer launches you 1000+ blocks up into air when you look down 
 - Setting the microphone to the one already being used in `/sephyr microphone` now shows a correct message.
 
 ## [0.2.0-alpha] - 2026-10-31

@@ -182,9 +182,10 @@ public class WindBeamSpell extends Spell {
         // We don't want to get caught in our own spell
         float casterHeight = caster.getBbHeight();
         float casterEyeHeight = caster.getEyeHeight();
-        double offset = Math.max(casterEyeHeight, casterHeight - casterEyeHeight);
-        offset = Math.max(caster.getBbWidth() / 2.0, offset);
-        offset = Math.max(offset, 1.0);
-        return origin.add(castDirection.scale(depth / 2.0 + offset)).toVector3f();
+        float height = Math.max(casterEyeHeight, casterHeight - casterEyeHeight);
+        double side = caster.getBbWidth() / 2.0;
+        double minOffset = Math.sqrt(height * height + 2.0 * side * side);
+        minOffset = Math.max(minOffset + 0.01, 1.0);
+        return origin.add(castDirection.scale(depth / 2.0 + minOffset)).toVector3f();
     }
 }
