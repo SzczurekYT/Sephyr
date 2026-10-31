@@ -23,7 +23,7 @@ public class Words {
     public static final String FORCE = "vəˈluɡoː";
     public static final String SPHERE = "plɒka";
     public static final String PLANE = "toŋk";
-    public static final String WIND = "ʔalɪˈvɑn";
+    public static final String WIND = "alɪˈvɑn";
     public static final String FIRE = "ibaŋk";
     public static final String LIGHT = "prizim";
     public static final String DEBUG = "kɛjfida";
