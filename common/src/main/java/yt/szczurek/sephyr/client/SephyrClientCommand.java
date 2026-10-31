@@ -44,6 +44,7 @@ public class SephyrClientCommand {
 
     private static int setMicExec(CommandContext<SharedSuggestionProvider> ctx) {
         String micName = ctx.getArgument("microphone", String.class);
+        Microphone previousMic = Sepple.getCurrentMicrophone();
         List<Microphone> mics = Sepple.enumerateMicrophones();
         Optional<Microphone> mic = mics.stream().filter(microphone -> microphone.name().equals(micName)).findFirst();
         if (mic.isEmpty()) {
@@ -51,6 +52,10 @@ public class SephyrClientCommand {
             return Command.SINGLE_SUCCESS;
         }
         String newMicId = mic.get().id();
+        if (previousMic != null && newMicId.equals(previousMic.id())) {
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("This microphone is already selected"));
+            return Command.SINGLE_SUCCESS;
+        }
         boolean success = SeppleManager.setMicrophone(newMicId);
         Microphone current = Sepple.getCurrentMicrophone();
         if (success && current != null) {

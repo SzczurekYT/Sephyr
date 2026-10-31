@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+- Setting the microphone to the one already being used in `/sephyr microphone` now shows a correct message.
 
 ## [0.2.0-alpha] - 2026-10-31
 
