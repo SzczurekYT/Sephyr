@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-31
+
 ### Added
 - Leap spell now launches the caster with additional upward force.
 - Spell recognition system status can now be checked with `/sephyr status` command.
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial prototype release with 3 spells, to test the concept.
 
-[unreleased]: https://github.com/SzczurekYT/Sephyr/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.0...v0.1.0
 [0.1.0]: https://github.com/SzczurekYT/Sephyr/releases/tag/v0.1.0
 [SemVer]: https://semver.org
