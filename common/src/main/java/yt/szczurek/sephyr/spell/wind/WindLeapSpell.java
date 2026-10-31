@@ -92,7 +92,7 @@ public class WindLeapSpell extends Spell {
     }
 
     public double calculateForceTimeMultiplier(double timeFraction) {
-        return Math.pow(1 - timeFraction + 0.1, 3.8) * 0.58 + 0.8;
+        return Math.pow(1 - timeFraction + 0.05, 20) * 1.14 + 0.8;
     }
 
 
