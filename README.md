@@ -1,6 +1,7 @@
 # ✨ Sephyr
 **Sephyr is a voice spellcasting mod, where you cast spells by speaking out loud magic chants in a fictional language.** Instead of pressing keybinds or using spellbooks, all you need to cast your first spell, is knowing of what to say.<br>
 
+[![Click to watch the demo video](https://github.com/user-attachments/assets/abdb6481-11e2-479a-8d4c-33f0dedf3cc5)](https://www.youtube.com/watch?v=xAiQTp_prnc)   
 ---
 ⚠️ PROTOTYPE WARNING - This project is on a proof of concept stage. I want to let others test if the idea of spoken magic can work well and be fun, but aside, there isn't much content in the mod yet.
 
