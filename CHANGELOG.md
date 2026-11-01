@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.2.1-alpha] - 2026-10-31
 ### Fixed
 - Reversed wind beam no longer launches you 1000+ blocks up into air when you look down 
 - Setting the microphone to the one already being used in `/sephyr microphone` now shows a correct message.
@@ -30,7 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Initial prototype release with 3 spells, to test the concept.
 
-[unreleased]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.0-alpha...HEAD
+[unreleased]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.1-alpha...HEAD
+[0.2.1-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.1-alpha...v0.2.0-alpha
 [0.2.0-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.0-alpha...v0.1.0-alpha
 [0.1.0-alpha]: https://github.com/SzczurekYT/Sephyr/releases/tag/v0.1.0-alpha
 [SemVer]: https://semver.org
