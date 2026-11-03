@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Optimized Jar size bringing it down to 37 MiB from 52 MiB
+
 ## [0.2.1-alpha] - 2026-10-31
 ### Fixed
 - Reversed wind beam no longer launches you 1000+ blocks up into air when you look down 

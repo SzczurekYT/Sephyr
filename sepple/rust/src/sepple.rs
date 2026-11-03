@@ -8,7 +8,7 @@ use sepple::{
     configs::PreconfiguredPipelineParts,
     dictionary::Dictionary,
     error::SeppleError,
-    model_provider,
+    model_provider::{self, SILERO_MODEL_META, ZIPA_MODEL_META},
     pipeline::{
         Pipeline,
         processor::{
@@ -38,14 +38,17 @@ impl Sepple {
         progress_consumer: &Consumer<(u64, Option<u64>)>,
         on_model_loading: &Consumer<()>,
     ) -> Result<(Self, Arc<Mutex<AudioCaptureController>>), SeppleError> {
-        let model_path: PathBuf = if model_path.is_empty() {
+        let zipa_model_path: PathBuf = if model_path.is_empty() {
             let progress_callback = |downloaded: u64, total: Option<u64>| {
                 progress_consumer.accept((downloaded, total));
             };
-            model_provider::ensure_downloaded_and_get_path(&progress_callback)?
+            model_provider::ensure_downloaded_and_get_path(&ZIPA_MODEL_META, &progress_callback)?
         } else {
             PathBuf::from(model_path)
         };
+
+        let vad_model_path =
+            model_provider::ensure_downloaded_and_get_path(&SILERO_MODEL_META, &|_, _| {})?;
 
         on_model_loading.accept(());
 
@@ -56,9 +59,9 @@ impl Sepple {
             sliding_window_chunker,
         } = PreconfiguredPipelineParts::default();
 
-        let vad_scorer = SileroVadScorer::init();
+        let vad_scorer = SileroVadScorer::init(vad_model_path);
 
-        let ipa_processor = IpaProcessor::init(model_path, &sliding_window_config)?;
+        let ipa_processor = IpaProcessor::init(zipa_model_path, &sliding_window_config)?;
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
         let audio_capture = AudioCapture::new(microphone_id)?;
