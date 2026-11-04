@@ -37,9 +37,8 @@ def rustDir = file("../rust")
 def nativesDir = file("src/main/resources/natives/sepple_java")
 def cargoCacheDir = project.layout.buildDirectory.file("cargo").get().asFile
 def docker = Os.isFamily(Os.FAMILY_MAC) ? "/usr/local/bin/docker" : "docker"
-project.ext.xWinImage = 'localhost/sepple-build-xwin'
-project.ext.zigbuildImage = 'localhost/sepple-build-zigbuild'
-def rustVersion = '1.98.1'
+project.ext.xWinImage = project.findProperty("xWinImage") ?: 'localhost/sepple-build-xwin'
+project.ext.zigbuildImage = project.findProperty("zigbuildImage") ?: 'localhost/sepple-build-zigbuild'
 
 project.ext.baseDockerCommand = [
         docker,
@@ -65,14 +64,14 @@ tasks.register('createContainersDirectory') {
 tasks.register('buildZigbuildImage', Exec) {
     group = 'rust'
     workingDir rustDir
-    commandLine docker, 'build', '-t', project.ext.zigbuildImage, 'container/zigbuild', '--build-arg', "RUST_VERSION=${rustVersion}"
+    commandLine docker, 'build', '-t', project.ext.zigbuildImage, 'container/zigbuild', '--build-arg', "RUST_VERSION=${rust_version}"
     dependsOn createContainersDirectory
 }
 
 tasks.register('buildXWinImage', Exec) {
     group = 'rust'
     workingDir rustDir
-    commandLine docker, 'build', '-t', project.ext.xWinImage, 'container/xwin', '--build-arg', "RUST_VERSION=${rustVersion}"
+    commandLine docker, 'build', '-t', project.ext.xWinImage, 'container/xwin', '--build-arg', "RUST_VERSION=${rust_version}"
     dependsOn createContainersDirectory
 }
 

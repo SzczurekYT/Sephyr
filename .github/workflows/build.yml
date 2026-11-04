@@ -1,0 +1,217 @@
+name: Build Sephyr
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Inspect changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      build-docker: ${{ steps.filter.outputs.build-docker }}
+      build-natives: ${{ steps.filter.outputs.build-natives }}
+    steps:
+    - uses: actions/checkout@v7
+    - uses: dorny/paths-filter@v4
+      id: filter
+      with:
+        filters: |
+          build-docker:
+            - "sepple/rust/container/**"
+            - "sepple/java/build.gradle"
+            - ".github/workflows/build.yml"
+          build-natives:
+            - 'sepple/rust/**'
+            - 'sepple/java/build.gradle'
+            - '.github/workflows/build.yml'
+  build-docker:
+    name: Build ${{ matrix.image }} Docker image
+    runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.build-docker == 'true' }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [xwin, zigbuild]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      
+      - uses: ./.github/actions/read-image-version
+        id: image-version
+        with:
+          image: ${{ matrix.image }}
+
+      - name: Read Rust version
+        shell: bash
+        id: rust-version
+        run: |
+          version="$(awk -F= '$1 == "rust_version" {print $2}' gradle.properties)"
+          if [ -z "$version" ]; then
+            echo "Could not read rust version from gradle.properties" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          file: "sepple/rust/container/${{ matrix.image }}/Dockerfile"
+          build-args: |
+            RUST_VERSION=${{ steps.rust-version.outputs.version }}
+          push: true
+          tags: ghcr.io/szczurekyt/sephyr/rust-builder-${{ matrix.image }}:${{ steps.image-version.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+  build-natives:
+    name: Build Sepple (${{ matrix.os }} ${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - build-docker
+    if: ${{ always() && needs.changes.result == 'success' && needs.changes.outputs.build-natives == 'true' && (needs.build-docker.result == 'success' || needs.build-docker.result == 'skipped' ) }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os:   [macos, linux, windows]
+        arch: [x86_64, aarch64]
+        include:
+          - { os: macos, ext: dylib, image: zigbuild }
+          - { os: linux, ext: so, image: zigbuild }
+          - { os: windows, ext: dll, image: xwin }
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/read-image-version
+        id: image-version
+        with:
+          image: ${{ matrix.image }}
+
+      - id: vars
+        run: |
+            echo "docker_image=ghcr.io/szczurekyt/sephyr/rust-builder-${{ matrix.image }}:${{ steps.image-version.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "lib_name=sepple_java_${{ matrix.arch }}_${{ matrix.os }}.${{ matrix.ext }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Pull Docker image
+        run: docker pull "${{ steps.vars.outputs.docker_image }}"
+
+      - name: Cache cargo
+        uses: actions/cache@v5
+        with:
+          path: ${{ github.workspace }}/sepple/java/build/cargo
+          key: ${{ matrix.arch }}-${{ matrix.os }}-${{ hashFiles('sepple/rust/Cargo.lock') }}
+
+      - name: Compile Rust
+        # Only one of those will be correct, but only that one will be used so it's fine
+        run: ./gradlew -PxWinImage="${{ steps.vars.outputs.docker_image }}" -PzigbuildImage="${{ steps.vars.outputs.docker_image }}" :sepple:compileRust-${{ matrix.os }}-${{ matrix.arch }}
+
+      - name: Take back file ownership from Docker
+        run: sudo chown -R $USER:$USER .
+
+      - name: Rename library file
+        run: mkdir -p sepple/rust/target/release/ && mv sepple/rust/target/*/release/*sepple_java.${{ matrix.ext }} sepple/rust/target/release/${{ steps.vars.outputs.lib_name }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          path: sepple/rust/target/release/${{ steps.vars.outputs.lib_name }}
+          if-no-files-found: error
+          archive: false
+  pack-build:
+    name: Build Sephyr
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - build-natives
+    if: ${{ always() && needs.changes.result == 'success' && (needs.build-natives.result == 'success' || needs.build-natives.result == 'skipped' ) }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # Binaries were rebuilt - pack them and upload
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.changes.outputs.build-natives == 'true' }}
+        with:
+          pattern: sepple_java_*
+          path: sepple/java/src/main/resources/natives/sepple_java
+          merge-multiple: true
+
+      - name: List downloaded natives
+        if: ${{ needs.changes.outputs.build-natives == 'true' }}
+        run: ls -lh sepple/java/src/main/resources/natives/sepple_java
+
+      - name: Pack into LZ4 zip
+        if: ${{ needs.changes.outputs.build-natives == 'true' }}
+        run: ./gradlew :sepple:packRustNatives
+
+      - name: Upload LZ4 zip
+        uses: actions/upload-artifact@v7
+        if: ${{ needs.changes.outputs.build-natives == 'true' }}
+        with:
+          path: sepple/java/src/main/resources/natives/sepple_java/sepple_java_binaries.zip.l4z
+          if-no-files-found: error
+          archive: false
+
+      # Binaries weren't rebuilt - download them
+      - name: Download natives zip
+        id: download-natives
+        if: ${{ needs.changes.outputs.build-natives == 'false' }}
+        uses: dawidd6/action-download-artifact@v28
+        with:
+          workflow_conclusion: success
+          name: sepple_java_binaries.zip.l4z
+          path: sepple/java/src/main/resources/natives/sepple_java
+        continue-on-error: true  
+
+      - name: List natives zip
+        run: ls -lh sepple/java/src/main/resources/natives/sepple_java
+
+      - name: Build Neoforge Jar
+        run: ./gradlew :neoforge:build
+
+      - name: Upload Neoforge Jar
+        uses: actions/upload-artifact@v7
+        with:
+          path: neoforge/build/libs/sephyr-neoforge-*.*.*-*.*.*-alpha.jar
+          if-no-files-found: error
+          archive: false
+
+
+    

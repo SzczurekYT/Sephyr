@@ -1,0 +1,22 @@
+name: "Read building image version"
+description: ""
+inputs:
+  image:
+    required: true
+outputs:
+  version:
+    description: 'The read image version'
+    value: ${{ steps.step.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      id: step
+      run: |
+        version="$(cat sepple/rust/container/${{ inputs.image }}/image-version)"
+        if [ -z "$version" ]; then
+          echo "Could not read image-version from sepple/rust/container/${{ inputs.image }}/image-version" >&2
+          exit 1
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+    
