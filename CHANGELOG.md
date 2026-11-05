@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Optimized Jar size bringing it down to 30 MiB from 52 MiB
+- Redcued the time spellcasting system waits to determine if a spell with optional words is finished by 0.5s.
 
 ## [0.2.1-alpha] - 2026-10-31
 ### Fixed

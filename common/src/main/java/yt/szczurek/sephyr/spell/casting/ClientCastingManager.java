@@ -12,7 +12,7 @@ public class ClientCastingManager {
     public static final ClientCastingManager INSTANCE = new ClientCastingManager();
     private static final Component STAR_COMPONENT = Component.literal("✨").withColor(16773205); // 0xfff055
     // Time from last word, before the spell is executed / reset
-    private static final long WORD_TIMEOUT_MS = 2500;
+    private static final long WORD_TIMEOUT_MS = 2000;
 
     private long lastWordTimestamp = Long.MAX_VALUE;
 
