@@ -5811,7 +5811,7 @@ dependencies = [
 
 [[package]]
 name = "sepple-java"
-version = "0.2.0"
+version = "0.2.2"
 dependencies = [
  "j4rs",
  "j4rs_derive",

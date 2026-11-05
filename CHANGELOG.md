@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2-alpha] - 2026-11-05
+
 ### Changed
 - Optimized Jar size bringing it down to 30 MiB from 52 MiB
 - Redcued the time spellcasting system waits to determine if a spell with optional words is finished by 0.5s.
@@ -37,7 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial prototype release with 3 spells, to test the concept.
 
 [unreleased]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.1-alpha...HEAD
-[0.2.1-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.1-alpha...v0.2.0-alpha
-[0.2.0-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.0-alpha...v0.1.0-alpha
+[0.2.2-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.1-alpha...v0.2.2-alpha
+[0.2.1-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.2.0-alpha...v0.2.1-alpha
+[0.2.0-alpha]: https://github.com/SzczurekYT/Sephyr/compare/v0.1.0-alpha...v0.2.0-alpha
 [0.1.0-alpha]: https://github.com/SzczurekYT/Sephyr/releases/tag/v0.1.0-alpha
 [SemVer]: https://semver.org
