@@ -9,10 +9,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jspecify.annotations.NonNull;
+import yt.szczurek.sephyr.Messages;
 
 public class ModelDownloadToast implements Toast {
     private static final Identifier BACKGROUND_SPRITE = Identifier.withDefaultNamespace("toast/system");
-    private static final Component TITLE = Component.literal("Sephyr: Downloading Speech Model");
 
     private volatile long downloaded;
     private volatile long total = -1;
@@ -55,7 +55,7 @@ public class ModelDownloadToast implements Toast {
     public void extractRenderState(GuiGraphicsExtractor graphics, @NonNull Font font, long fullyVisibleForMs) {
         int height = this.height();
         graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND_SPRITE, 0, 0, this.width(), height);
-        graphics.text(font, TITLE, 18, 7, -256, false);
+        graphics.text(font, Messages.DOWNLOAD_TOAST_TITLE, 18, 7, -256, false);
         graphics.text(font, progressText(), 18, 18, -1, false);
 
         int progressBarY = height - 4;
@@ -73,13 +73,13 @@ public class ModelDownloadToast implements Toast {
         return Mth.clamp((float) downloaded / total, 0.0F, 1.0F);
     }
 
-    private String progressText() {
+    private Component progressText() {
         long downloadedMb = downloaded / (1024 * 1024);
         if (total <= 0) {
-            return downloadedMb + " MB";
+            return Messages.downloadProgressUnknown(downloadedMb);
         }
         long totalMb = Math.max(1, total / (1024 * 1024));
         int percent = (int) (100 * downloaded / total);
-        return percent + "% (" + downloadedMb + " / " + totalMb + " MB)";
+        return Messages.downloadProgress(percent, downloadedMb, totalMb);
     }
 }

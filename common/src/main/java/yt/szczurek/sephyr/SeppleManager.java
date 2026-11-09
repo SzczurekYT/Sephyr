@@ -5,8 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import org.slf4j.event.Level;
 import yt.szczurek.sephyr.client.SephyrClientConfig;
 import yt.szczurek.sephyr.spell.Words;
@@ -22,10 +20,6 @@ public class SeppleManager {
 
     private static final ModelDownloadToast DOWNLOAD_TOAST = new ModelDownloadToast();
     private static final SystemToast.SystemToastId LOADING_TOAST_ID = new SystemToast.SystemToastId(Long.MAX_VALUE);
-    private static final MutableComponent LOADING_TITLE = Component.literal("Sephyr is still loading");
-    private static final MutableComponent LOADING_MESSAGE = Component.literal("Spellcasting will not work yet.");
-    private static final MutableComponent READY_TITLE = Component.literal("Sephyr is ready");
-    private static final MutableComponent READY_MESSAGE = Component.literal("Spellcasting is now available.");
 
     public static volatile boolean mcClientLoaded = false;
     private static volatile SeppleLoadState seppleLoadState = SeppleLoadState.LOADING;
@@ -78,7 +72,10 @@ public class SeppleManager {
             if (success) {
                 if (manager.getToast(SystemToast.class, LOADING_TOAST_ID) != null) {
                     SystemToast.forceHide(manager, LOADING_TOAST_ID);
-                    manager.addToast(new SystemToast(new SystemToast.SystemToastId(4000L), READY_TITLE, READY_MESSAGE));
+                    manager.addToast(new SystemToast(new SystemToast.SystemToastId(4000L),
+                            Messages.READY_TOAST_TITLE,
+                            Messages.READY_TOAST_MESSAGE
+                    ));
                 }
             } else {
                 SystemToast.forceHide(manager, LOADING_TOAST_ID);
@@ -95,7 +92,11 @@ public class SeppleManager {
         Minecraft client = Minecraft.getInstance();
         var inWorld = client.level != null;
         if (inWorld) {
-            SystemToast.addOrUpdate(client.getToastManager(), LOADING_TOAST_ID, LOADING_TITLE, LOADING_MESSAGE);
+            SystemToast.addOrUpdate(client.getToastManager(),
+                    LOADING_TOAST_ID,
+                    Messages.LOADING_TOAST_TITLE,
+                    Messages.LOADING_TOAST_MESSAGE
+            );
         }
     }
 
@@ -112,9 +113,10 @@ public class SeppleManager {
     }
 
     private static void sendSeppleFailToast(Minecraft client) {
-        MutableComponent title = Component.literal("Sephyr mod init failed");
-        MutableComponent message = Component.literal("Casting will not work! Check logs for details!");
-        client.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(10000L), title, message));
+        client.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(10000L),
+                Messages.FAILED_TOAST_TITLE,
+                Messages.FAILED_TOAST_MESSAGE
+        ));
     }
 
     public static void startSepple() {
@@ -124,7 +126,11 @@ public class SeppleManager {
 
         if (seppleLoadState == SeppleLoadState.LOADING) {
             Minecraft client = Minecraft.getInstance();
-            SystemToast.addOrUpdate(client.getToastManager(), LOADING_TOAST_ID, LOADING_TITLE, LOADING_MESSAGE);
+            SystemToast.addOrUpdate(client.getToastManager(),
+                    LOADING_TOAST_ID,
+                    Messages.LOADING_TOAST_TITLE,
+                    Messages.LOADING_TOAST_MESSAGE
+            );
         }
 
         Thread seppleThread = new Thread(() -> Sepple.run(ClientCastingManager.INSTANCE::handleNewWord));

@@ -1,6 +1,5 @@
 package yt.szczurek.sephyr.client;
 
-import com.google.common.base.CaseFormat;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -11,11 +10,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.blay09.mods.balm.client.BalmClient;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import yt.szczurek.sephyr.Sephyr;
+import yt.szczurek.sephyr.Messages;
 import yt.szczurek.sephyr.SeppleManager;
 import yt.szczurek.sepple.Microphone;
 import yt.szczurek.sepple.Sepple;
@@ -48,30 +46,25 @@ public class SephyrClientCommand {
         List<Microphone> mics = Sepple.enumerateMicrophones();
         Optional<Microphone> mic = mics.stream().filter(microphone -> microphone.name().equals(micName)).findFirst();
         if (mic.isEmpty()) {
-            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("Invalid microphone selected"));
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Messages.invalidMicrophone());
             return Command.SINGLE_SUCCESS;
         }
         String newMicId = mic.get().id();
         if (previousMic != null && newMicId.equals(previousMic.id())) {
-            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("This microphone is already selected"));
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Messages.microphoneAlreadySelected());
             return Command.SINGLE_SUCCESS;
         }
         boolean success = SeppleManager.setMicrophone(newMicId);
         Microphone current = Sepple.getCurrentMicrophone();
         if (success && current != null) {
             if (current.id().equals(newMicId)) {
-                Minecraft.getInstance().gui.getChat().addClientSystemMessage(Component.literal("Set the microphone to " + micName));
+                Minecraft.getInstance().gui.getChat().addClientSystemMessage(Messages.microphoneSet(micName));
             } else {
                 Minecraft.getInstance().gui.getChat().addClientSystemMessage(
-                        Component.literal("Failed to start capturing this microphone" +
-                                "\nMicrophone \"" + current.name() + "\" was used instead"
-                        ).withStyle(ChatFormatting.RED));
+                        Messages.microphoneFailedWithFallback(current.name()));
             }
         } else {
-            Minecraft.getInstance().gui.getChat().addClientSystemMessage(
-                    Component.literal("Failed to start capturing this microphone" +
-                            "\nLogs might have additional details"
-                    ).withStyle(ChatFormatting.RED));
+            Minecraft.getInstance().gui.getChat().addClientSystemMessage(Messages.microphoneFailed());
         }
 
         return Command.SINGLE_SUCCESS;
@@ -87,21 +80,7 @@ public class SephyrClientCommand {
     private static int statusExec(CommandContext<SharedSuggestionProvider> ctx) {
         Microphone currentMic = Sepple.getCurrentMicrophone();
 
-        Component isRunning = Component.literal("\nIs running: ").withStyle(ChatFormatting.WHITE)
-                .append(Sepple.isRunning() ?
-                Component.literal("Yes").withStyle(ChatFormatting.GREEN) :
-                Component.literal("No").withStyle(ChatFormatting.RED));
-        String state = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, SeppleManager.loadingState().name());
-        Component loadingState = Component.literal("\nLoading state: ").withStyle(ChatFormatting.WHITE)
-                .append(Component.literal(state).withStyle(ChatFormatting.GRAY));
-        Component microphone = Component.literal("\nMicrophone: ").withStyle(ChatFormatting.WHITE)
-                .append(currentMic == null ?
-                        Component.literal("None").withStyle(ChatFormatting.RED) :
-                        Component.literal(String.format("%s (%s)", currentMic.name(), currentMic.id())).withStyle(ChatFormatting.GRAY));
-        Component message = Component.literal("Sephyr status").withColor(Sephyr.BLUE_COLOR)
-                .append(isRunning)
-                .append(loadingState)
-                .append(microphone);
+        Component message = Messages.statusSummary(Sepple.isRunning(), SeppleManager.loadingState(), currentMic);
         Minecraft.getInstance().gui.getChat().addClientSystemMessage(message);
 
         return Command.SINGLE_SUCCESS;
