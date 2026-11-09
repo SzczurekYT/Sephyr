@@ -9,7 +9,7 @@ public class LogCallback {
         this.callback = callback;
     }
 
-    public void accept(String message, boolean isError) {
-        callback.accept(message, isError);
+    public void accept(String message, boolean bool) {
+        callback.accept(message, bool);
     }
 }

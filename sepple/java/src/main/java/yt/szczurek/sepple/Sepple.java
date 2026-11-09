@@ -45,16 +45,29 @@ public class Sepple {
         return Java2RustUtils.getObjectCasted(result);
     }
 
-    public static void setupLogging(BiConsumer<String, Boolean> callback) {
-        SeppleBinding.setupLogging(Java2RustUtils.createInstance(new LogCallback(callback)));
+    public static void setupLogging(BiConsumer<String, Boolean> logCallback, Consumer<MicError> micErrorCallback) {
+        SeppleBinding.setupLogging(
+                Java2RustUtils.createInstance(new LogCallback(logCallback)),
+                Java2RustUtils.createInstance(new MicErrorCallback(micErrorCallback))
+        );
+    }
+
+    public static void setupActivityCallback(Runnable callback) {
+        SeppleBinding.setupActivityCallback(
+                Java2RustUtils.createInstance(new SpeechActivityCallback(callback))
+        );
     }
 
     public static List<Microphone> enumerateMicrophones() {
         return Java2RustUtils.getObjectCasted(SeppleBinding.enumerateMicrophones());
     }
 
-    public static boolean setMicrophone(String id) {
-        Instance<Boolean> result = SeppleBinding.setMicrophone(Java2RustUtils.createInstance(id));
+    // Returns error, null if success
+    public static @Nullable MicError setMicrophone(@Nullable String id) {
+        if (id == null) {
+            id = "";
+        }
+        Instance<MicError> result = SeppleBinding.setMicrophone(Java2RustUtils.createInstance(id));
         return Java2RustUtils.getObjectCasted(result);
     }
 

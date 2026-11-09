@@ -16,7 +16,7 @@ use sepple::{
             silero_vad_scorer::SileroVadScorer,
             word_detector::{DetectedWord, WordDetector},
         },
-        producer::capture::{AudioCapture, AudioCaptureController},
+        producer::capture::{AudioCapture, AudioCaptureController, CallbackErrorOrigin},
     },
 };
 use tokio::{
@@ -24,7 +24,11 @@ use tokio::{
     time::timeout,
 };
 
-use crate::{consumer::Consumer, jni::SHOULD_STOP};
+use crate::{
+    activity_tap::SpeechActivityTap,
+    consumer::Consumer,
+    jni::{SHOULD_STOP, report_mic_error},
+};
 
 pub struct Sepple {
     pipeline: Pipeline<DetectedWord>,
@@ -64,13 +68,20 @@ impl Sepple {
         let ipa_processor = IpaProcessor::init(zipa_model_path, &sliding_window_config)?;
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
-        let audio_capture = AudioCapture::new(microphone_id)?;
+        let audio_capture = AudioCapture::with_error_handler(microphone_id, |err, origin| {
+            let origin = match origin {
+                CallbackErrorOrigin::FirstRun => "STARTUP",
+                CallbackErrorOrigin::Stream => "STREAM",
+            };
+            report_mic_error(origin, &err);
+        });
         let audio_controller = audio_capture.controller();
 
         let pipeline = Pipeline::new(audio_capture)
             .then(audio_chunker)
             .then(vad_scorer)
             .then(vad_filter)
+            .then(SpeechActivityTap::new())
             .then(sliding_window_chunker)
             .then(ipa_processor)
             .then(word_detector);

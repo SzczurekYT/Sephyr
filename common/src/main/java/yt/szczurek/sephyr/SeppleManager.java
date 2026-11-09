@@ -1,6 +1,5 @@
 package yt.szczurek.sephyr;
 
-import net.blay09.mods.balm.Balm;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.Toast;
@@ -13,8 +12,6 @@ import yt.szczurek.sephyr.toast.ModelDownloadToast;
 import yt.szczurek.sepple.ModelLoadingCallback;
 import yt.szczurek.sepple.ProgressCallback;
 import yt.szczurek.sepple.Sepple;
-
-import java.util.Objects;
 
 public class SeppleManager {
 
@@ -30,7 +27,8 @@ public class SeppleManager {
         Sepple.setupLogging((message, isError) -> {
             Level level = isError ? Level.ERROR : Level.INFO;
             Sephyr.LOG.atLevel(level).log("(Sepple/Rust) {}", message);
-        });
+        }, MicManager::onMicError);
+        Sepple.setupActivityCallback(MicManager::onSpeechDetected);
         // We do the init off thread, so we don't slow down game start
         // We also allocate bigger stack, because Rust can sometime require more than Java allocates by default
         Thread initThread = new Thread(null, SeppleManager::initSepple, "SeppleNativeThread", 2 * 1024 * 1024L);
@@ -52,14 +50,10 @@ public class SeppleManager {
     }
 
     private static void initSepple() {
-        SephyrClientConfig config = Objects.requireNonNull(
-                Balm.config().getActiveConfig(SephyrClientConfig.class),
-                "init should only be called after config is loaded"
-        );
         // Model path can be overridden here for development if needed
         boolean success = Sepple.init(
                 null,
-                config.microphoneId,
+                SephyrClientConfig.microphoneId(),
                 Words.getList(),
                 new ProgressCallback(SeppleManager::onDownloadProgress),
                 new ModelLoadingCallback(SeppleManager::onModelLoadingNotification)
@@ -138,6 +132,8 @@ public class SeppleManager {
     }
 
     public static void stopSepple() {
+        MicManager.onCaptureStopped();
+
         if (seppleLoadState == SeppleLoadState.FAILED) {
             return;
         }
@@ -160,11 +156,4 @@ public class SeppleManager {
         return seppleLoadState;
     }
 
-    public static boolean setMicrophone(String microphoneId) {
-        boolean success = Sepple.setMicrophone(microphoneId);
-        if (success) {
-            Balm.config().updateLocalConfig(SephyrClientConfig.class, config -> config.microphoneId = microphoneId);
-        }
-        return success;
-    }
 }

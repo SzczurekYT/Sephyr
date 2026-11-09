@@ -12,15 +12,18 @@ use std::{
 use j4rs::{InvocationArg, Null, prelude::*};
 use j4rs_derive::*;
 use sepple::{
-    error::SeppleError,
+    error::{SeppleAudioError, SeppleError},
     pipeline::producer::capture::{AudioCaptureController, CaptureDevice},
 };
 
 use crate::{consumer::Consumer, sepple::Sepple};
 
 const MICROPHONE_CLASS: &str = "yt.szczurek.sepple.Microphone";
+const MIC_ERROR_CLASS: &str = "yt.szczurek.sepple.MicError";
 
 static LOG_CALLBACK: Mutex<Option<Consumer<(String, bool)>>> = Mutex::new(None);
+static MIC_ERROR_CALLBACK: Mutex<Option<Consumer<Instance>>> = Mutex::new(None);
+static SPEECH_ACTIVITY_CALLBACK: Mutex<Option<Consumer<()>>> = Mutex::new(None);
 static SEPPLE: (Mutex<Option<Sepple>>, Condvar) = (Mutex::new(None), Condvar::new());
 static AUDIO_CONTROLLER: Mutex<Option<Arc<Mutex<AudioCaptureController>>>> = Mutex::new(None);
 static IS_RUNNING: AtomicBool = AtomicBool::new(false);
@@ -44,6 +47,13 @@ fn log_consumer_arg_builder(
         consumer.build_arg(message, "message")?,
         consumer.build_primitive_arg(is_error, "isError")?,
     ])
+}
+
+fn mic_error_consumer_arg_builder(
+    consumer: &Consumer<Instance>,
+    error: Instance,
+) -> Option<Vec<InvocationArg>> {
+    Some(vec![consumer.build_arg(error, "error")?])
 }
 
 fn progress_consumer_arg_builder(
@@ -177,9 +187,22 @@ fn is_running() -> Result<Instance, String> {
 }
 
 #[call_from_java("yt.szczurek.sepple.SeppleBinding.setupLogging")]
-fn setup_logging(log_consumer: Instance) {
+fn setup_logging(log_consumer: Instance, mic_error_consumer: Instance) {
     *LOG_CALLBACK.lock().unwrap() =
         Some(Consumer::new(log_consumer, "log", log_consumer_arg_builder));
+    *MIC_ERROR_CALLBACK.lock().unwrap() = Some(Consumer::new(
+        mic_error_consumer,
+        "mic_error",
+        mic_error_consumer_arg_builder,
+    ));
+}
+
+#[call_from_java("yt.szczurek.sepple.SeppleBinding.setupActivityCallback")]
+fn setup_activity_callback(callback: Instance) {
+    *SPEECH_ACTIVITY_CALLBACK.lock().unwrap() =
+        Some(Consumer::new(callback, "speech_activity", |_, _| {
+            Some(Vec::new())
+        }));
 }
 
 pub fn log<T>(text: T, is_error: bool)
@@ -192,6 +215,57 @@ where
         .as_ref()
         .expect("called log before logging was setup")
         .accept((text.to_string(), is_error));
+}
+
+pub fn notify_speech_activity() {
+    let guard = SPEECH_ACTIVITY_CALLBACK.lock().unwrap();
+    if let Some(callback) = guard.as_ref() {
+        callback.accept(());
+    }
+}
+
+fn create_mic_error(jvm: &Jvm, origin: &str, error: &SeppleAudioError) -> Result<Instance, String> {
+    let kind = format!("{:?}", error.error.kind());
+    let device_name = error
+        .error
+        .device()
+        .map(|device| device.name.clone())
+        .unwrap_or_default();
+    let detail = format!("{error:#}");
+    let args = [
+        InvocationArg::try_from(origin).map_err(|error| format!("{error}"))?,
+        InvocationArg::try_from(kind).map_err(|error| format!("{error}"))?,
+        InvocationArg::try_from(device_name).map_err(|error| format!("{error}"))?,
+        InvocationArg::try_from(detail).map_err(|error| format!("{error}"))?,
+    ];
+    jvm.invoke_static(MIC_ERROR_CLASS, "fromStrings", &args)
+        .map_err(|error| format!("{error}"))
+}
+
+pub fn report_mic_error(origin: &str, error: &SeppleAudioError) {
+    log(
+        format!("Microphone capture error ({origin}):\n{error:#}"),
+        true,
+    );
+
+    let jvm = Jvm::attach_thread().unwrap();
+    let instance = match create_mic_error(&jvm, origin, error) {
+        Ok(instance) => instance,
+        Err(error) => {
+            print_error(&error, "creating MicError");
+            return;
+        }
+    };
+
+    let guard = MIC_ERROR_CALLBACK.lock().unwrap();
+    if let Some(callback) = guard.as_ref() {
+        callback.accept(instance);
+    } else {
+        print_error(
+            &"microphone error callback was not registered",
+            "reporting a microphone error",
+        );
+    }
 }
 
 fn capture_device_to_java_microphone(device: CaptureDevice) -> InvocationArg {
@@ -217,15 +291,18 @@ fn set_microphone(id: Instance) -> Result<Instance, String> {
     let jvm = Jvm::attach_thread().unwrap();
 
     let id: String = jvm.to_rust(id).unwrap();
+    let id = if id.is_empty() { None } else { Some(id) };
     let result = AUDIO_CONTROLLER
         .lock()
         .unwrap()
         .as_ref()
         .map(|ctrl| ctrl.lock().unwrap().set_microphone(id));
     if let Some(Err(err)) = &result {
-        log(format!("Setting microphone failed!\n{err}"), true);
+        log(format!("Setting microphone failed!\n{err:#}"), true);
+        create_mic_error(&jvm, "SELECTION", err)
+    } else {
+        to_java(Null::Of(MIC_ERROR_CLASS))
     }
-    to_java(result.is_some_and(|result| result.is_ok()))
 }
 
 #[call_from_java("yt.szczurek.sepple.SeppleBinding.getCurrentMicrophone")]

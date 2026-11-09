@@ -15,10 +15,10 @@ RUN dpkg --add-architecture arm64 && \
 RUN apt-get install -y \
     pkg-config \
     libasound2-dev \
-    libpipewire-0.3-dev
+    libpulse-dev
 RUN apt-get install -y \
     libasound2-dev:arm64 \
-    libpipewire-0.3-dev:arm64
+    libpulse-dev:arm64
 RUN rm -rf /var/lib/apt/lists/*
 
 
