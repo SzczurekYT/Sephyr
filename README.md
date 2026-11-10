@@ -20,10 +20,17 @@ If the spell fails, wait a second and try saying it again. Be aware that the sys
 See below for a list of spells, and a troubleshooting guide if you are having issues.
 
 # 📥 Installation Guide
-You need to download the [mod](https://modrinth.com/mod/sephyr/versions), and its dependencies - [Balm](https://modrinth.com/mod/balm/versions), [Photon](https://modrinth.com/mod/photon-editor/versions) and [LDLib](https://modrinth.com/mod/ldlib/versions).<br>
+You need to install [Neoforge](https://neoforged.net/) on Minecraft 26.1.2 to play Sephyr. Download files listed below and put them into the `mods/` folder.
+- [Sephyr](https://github.com/SzczurekYT/Sephyr/releases/latest) - download the file named `sephyr-neoforge-26.1.2-x.x.x-alpha.jar`
+- [Balm](https://modrinth.com/mod/balm/versions) - needed due to **planned** Fabric support
+- [Photon](https://modrinth.com/mod/photon-editor/versions) - needed for cool VFX
+- [LDLib](https://modrinth.com/mod/ldlib/versions) - needed by Photon
+
 To use the mod you need a working microphone.<br>
-You also need around 260MB of free disk space. On first run Sephyr downloads a speech recognition model of this size, and run it on your computer. It's what makes it possible to detect the spoken magic words.<br>
-Once you are in a world you should be able to start casting right away. If words are not detected use `/sephyr status` to check what microphone is in use. If it's wrong type `/sephyr microphone `, use tab autocomplete to select a correct mirophone, and run the command.
+Once you are in a world you should be able to start casting right away.<br>
+If words are not detected use `/sephyr status` to check what microphone is in use. If it's wrong type `/sephyr microphone `, use tab autocomplete to select a correct mirophone, and run the command.<br>
+<br>
+Disclaimer: You also need around 260MB of free disk space. On first run Sephyr will download a speech recognition model of this size, and run it on your computer. It's what makes it possible to detect the spoken magic words.<br>
 # 🪄 Spell list
 Those are all spells currently available in the mod. They are written in [International Phonetic Alphabet](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet), used to describe pronunciation. You might have seen it in a dicitonary or a foreign language textbook. Currently there are only 3 of them, two of which have variants. All are wind ones, so the first word is always `alɪˈvɑn`.<br>
 Use this list to learn how to pronounce them
