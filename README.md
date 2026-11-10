@@ -6,7 +6,7 @@
 ⚠️ PROTOTYPE WARNING - This project is on a proof of concept stage. I want to let others test if the idea of spoken magic can work well and be fun, but aside, there isn't much content in the mod yet.
 
 ---
-## ❓Spellcasting - How To
+# How to cast spells
 Sephyr works by capturing audio from your microphone, and detecting keywords in it. To cast a spell you need to say a specific sequences of words. Each detected word will display above your hotbar.
 
 ![Spell word alɪˈvɑn above player's hotbar](https://cdn.modrinth.com/data/cached_images/f8f075848a107bb0a05331196241191f0b6e0d96.png)<br>
@@ -31,7 +31,8 @@ Once you are in a world you should be able to start casting right away.<br>
 If words are not detected use `/sephyr status` to check what microphone is in use. If it's wrong type `/sephyr microphone `, use tab autocomplete to select a correct mirophone, and run the command.<br>
 <br>
 Disclaimer: You also need around 260MB of free disk space. On first run Sephyr will download a speech recognition model of this size, and run it on your computer. It's what makes it possible to detect the spoken magic words.<br>
-# 🪄 Spell list
+
+# Spell List
 Those are all spells currently available in the mod. They are written in [International Phonetic Alphabet](https://en.wikipedia.org/wiki/International_Phonetic_Alphabet), used to describe pronunciation. You might have seen it in a dicitonary or a foreign language textbook. Currently there are only 3 of them, two of which have variants. All are wind ones, so the first word is always `alɪˈvɑn`.<br>
 Use this list to learn how to pronounce them
 <details>
@@ -62,7 +63,7 @@ Chant: `alɪˈvɑn vɛɾtɛɾ ɛvi [ˈɔnːdˌɔː / ãntikɔ / fɒksɑm]`
 Shoots a wind charge. Will be made cooler in the future.<br>
 Chant: `alɪˈvɑn wˈanga`
 
-# 🛠️ Troubleshooting Guide
+# Troubleshooting Guide
 If the detection ins't working for you run the `/sephyr status` command and ensure it looks like this:
 
 ![Output of the sephyr status command, showing the detection is running and the microphone is correct](https://cdn.modrinth.com/data/cached_images/3db30bf7684e2e23167049f599b52906cbca40a3.png)
