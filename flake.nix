@@ -28,6 +28,7 @@
           libpulseaudio
           # Sepple deps
           alsa-lib
+          libpulseaudio
         ];
       in
       with pkgs;

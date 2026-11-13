@@ -24,9 +24,10 @@ public class SeppleBinding {
     protected static native void run(Instance<WordCallback> callback);
     protected static native void stop();
     protected static native Instance<Boolean> isRunning();
-    protected static native void setupLogging(Instance<LogCallback> callback);
+    protected static native void setupLogging(Instance<LogCallback> logCallback, Instance<MicErrorCallback> micErrorCallback);
+    protected static native void setupActivityCallback(Instance<SpeechActivityCallback> callback);
     protected static native Instance<List<Microphone>> enumerateMicrophones();
-    protected static native Instance<Boolean> setMicrophone(Instance<String> id);
+    protected static native Instance<MicError> setMicrophone(Instance<String> id);
     protected static native Instance<Microphone> getCurrentMicrophone();
 
 
