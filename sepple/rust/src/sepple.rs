@@ -1,9 +1,9 @@
-use std::{path::PathBuf, sync::atomic::Ordering, time::Duration};
+use std::{ops::ControlFlow, path::PathBuf, sync::atomic::Ordering, time::Duration};
 
 use sepple::{
     configs::PreconfiguredPipelineParts,
     dictionary::Dictionary,
-    error::SeppleError,
+    error::{SeppleAudioError, SeppleError},
     model_provider::{self, SILERO_MODEL_META, ZIPA_MODEL_META},
     pipeline::{
         Pipeline,
@@ -17,17 +17,20 @@ use sepple::{
 };
 use tokio::{
     runtime::{self},
+    select,
+    sync::mpsc::{self, Receiver},
     time::timeout,
 };
 
 use crate::{
     consumer::Consumer,
-    jni::{SHOULD_STOP, report_mic_error},
+    jni::{SHOULD_STOP, notify_speech_activity, report_mic_error},
     speech_activity_notifier::SpeechActivityNotifier,
 };
 
 pub struct Sepple {
     pipeline: Pipeline<DetectedWord>,
+    callback_receiver: Receiver<CallbackValue>,
 }
 
 impl Sepple {
@@ -64,29 +67,37 @@ impl Sepple {
         let ipa_processor = IpaProcessor::init(zipa_model_path, &sliding_window_config)?;
         let word_detector = WordDetector::init(Dictionary::from_vec(dictionary));
 
-        let audio_capture = AudioCapture::with_error_handler(microphone_id, |err, origin| {
-            let origin = match origin {
-                CallbackErrorOrigin::FirstRun => "STARTUP",
-                CallbackErrorOrigin::Stream => "STREAM",
-            };
-            report_mic_error(origin, &err);
-        });
+        let (callback_sender, callback_receiver) = mpsc::channel(10);
+        let callback_sender_clone = callback_sender.clone();
+
+        let audio_capture =
+            AudioCapture::with_error_handler(microphone_id, move |error, origin| {
+                let _ = callback_sender_clone.try_send(CallbackValue::AudioError { error, origin });
+            });
         let audio_controller = audio_capture.controller();
 
         let pipeline = Pipeline::new(audio_capture)
             .then(audio_chunker)
             .then(vad_scorer)
             .then(vad_filter)
-            .then(SpeechActivityNotifier::new())
+            .then(SpeechActivityNotifier::new(callback_sender))
             .then(sliding_window_chunker)
             .then(ipa_processor)
             .then(word_detector);
 
-        Ok((Sepple { pipeline }, audio_controller))
+        Ok((
+            Sepple {
+                pipeline,
+                callback_receiver,
+            },
+            audio_controller,
+        ))
     }
 
     pub fn run(self, callback: &Consumer<String>) {
         let (mut receiver, handle) = self.pipeline.build_no_consumer();
+
+        let mut callback_receiver = self.callback_receiver;
 
         let rt = runtime::Builder::new_current_thread()
             .enable_time()
@@ -95,9 +106,11 @@ impl Sepple {
 
         let future = async {
             loop {
-                match timeout(Duration::from_millis(250), receiver.recv()).await {
-                    Ok(Some(word)) => callback.accept(word.word),
-                    Ok(None) => break,
+                let receiver_future =
+                    receiver_future(callback, &mut receiver, &mut callback_receiver);
+                match timeout(Duration::from_millis(250), receiver_future).await {
+                    Ok(ControlFlow::Continue(_)) => continue,
+                    Ok(ControlFlow::Break(_)) => break,
                     Err(_) => {
                         if SHOULD_STOP
                             .compare_exchange(true, false, Ordering::SeqCst, Ordering::SeqCst)
@@ -113,5 +126,52 @@ impl Sepple {
         rt.block_on(future);
 
         handle.cancel();
+    }
+}
+
+async fn receiver_future(
+    callback: &Consumer<String>,
+    receiver: &mut Receiver<DetectedWord>,
+    callback_receiver: &mut Receiver<CallbackValue>,
+) -> ControlFlow<()> {
+    select! {
+        val = receiver.recv() => {
+            match val {
+                Some(word) => { callback.accept(word.word); ControlFlow::Continue(()) },
+                None => ControlFlow::Break(()),
+            }
+        }
+        callback = callback_receiver.recv() => {
+            match callback {
+                Some(callback) => {
+                    callback.handle();
+                    ControlFlow::Continue(())
+                },
+                None => ControlFlow::Break(()),
+            }
+        }
+    }
+}
+
+pub(crate) enum CallbackValue {
+    Activity,
+    AudioError {
+        error: SeppleAudioError,
+        origin: CallbackErrorOrigin,
+    },
+}
+
+impl CallbackValue {
+    fn handle(&self) {
+        match self {
+            CallbackValue::Activity => notify_speech_activity(),
+            CallbackValue::AudioError { error, origin } => {
+                let origin = match origin {
+                    CallbackErrorOrigin::FirstRun => "STARTUP",
+                    CallbackErrorOrigin::Stream => "STREAM",
+                };
+                report_mic_error(origin, error);
+            }
+        };
     }
 }

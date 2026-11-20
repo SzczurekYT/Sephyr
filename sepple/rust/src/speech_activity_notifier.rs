@@ -5,18 +5,20 @@ use sepple::pipeline::{
 };
 use tokio::sync::mpsc::{Sender, error::SendError};
 
-use crate::jni::notify_speech_activity;
+use crate::sepple::CallbackValue;
 
 const CALLBACK_COOLDOWN: Duration = Duration::from_millis(250);
 
 pub struct SpeechActivityNotifier {
     last_callback: Option<Instant>,
+    callback_sender: Sender<CallbackValue>,
 }
 
 impl SpeechActivityNotifier {
-    pub fn new() -> Self {
+    pub fn new(callback_sender: Sender<CallbackValue>) -> Self {
         Self {
             last_callback: None,
+            callback_sender,
         }
     }
 }
@@ -54,7 +56,7 @@ impl PipelineProcessor for SpeechActivityNotifier {
                 .is_none_or(|last| now.duration_since(last) >= CALLBACK_COOLDOWN);
             if should_notify {
                 self.last_callback = Some(now);
-                notify_speech_activity();
+                let _ = self.callback_sender.try_send(CallbackValue::Activity);
             }
         }
 
