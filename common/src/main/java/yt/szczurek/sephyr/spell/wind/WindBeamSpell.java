@@ -1,10 +1,12 @@
 package yt.szczurek.sephyr.spell.wind;
 
+import com.lowdragmc.lowdraglib2.math.Transform;
 import com.lowdragmc.photon.client.fx.EntityEffectExecutor;
 import com.lowdragmc.photon.client.fx.FX;
 import com.lowdragmc.photon.client.fx.FXHelper;
 import com.lowdragmc.photon.client.fx.FXRuntime;
 import com.lowdragmc.photon.client.gameobject.EmptyFXObject;
+import com.lowdragmc.photon.client.gameobject.FXInstanceObject;
 import com.lowdragmc.photon.client.gameobject.IFXObject;
 import com.lowdragmc.photon.client.gameobject.emitter.data.number.Constant;
 import com.lowdragmc.photon.client.gameobject.emitter.data.number.NumberFunction3;
@@ -69,9 +71,7 @@ public class WindBeamSpell extends Spell {
             forceDirection = forceDirection.scale(-1.0);
         }
 
-        boolean expanded = box.diameter() > BOX_DIAMETER;
-
-        forceDirection = forceDirection.scale(expanded ? FORCE_STRENGTH_EXPANDED : FORCE_STRENGTH);
+        forceDirection = forceDirection.scale(isExpanded() ? FORCE_STRENGTH_EXPANDED : FORCE_STRENGTH);
 
         Entity caster = ctx.castingEntity().getEntity(spellEntity.level(), Entity.class);
         if (caster != null) {
@@ -94,6 +94,10 @@ public class WindBeamSpell extends Spell {
                 }
             }
         }
+    }
+
+    public boolean isExpanded() {
+        return box.diameter() > BOX_DIAMETER;
     }
 
     @Override
@@ -142,6 +146,16 @@ public class WindBeamSpell extends Spell {
             return;
         }
         offsetArm.transform().localPosition(new Vector3f(box.depth() / 2.0f, 0.0f, 0.0f));
+
+        IFXObject magicCircle = runtime.findObject("magic_circle");
+        if (!(magicCircle instanceof FXInstanceObject)) {
+            return;
+        }
+        boolean expanded = isExpanded();
+        Transform transform = magicCircle.transform();
+        Vector3f localPos = transform.localPosition();
+        transform.localPosition(new Vector3f(localPos.x, expanded ? -0.1f : -0.2f, localPos.z));
+        transform.localScale(new Vector3f(expanded ? 2.0f : 1.0f, expanded ? 2.0f : 1.0f, 1.0f));
     }
 
     public static @NotNull CommandNode<SpellCtx> buildNode() {

@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-
+### Added
+- Magic circle VFX for wind beam and wind leap spells
 ### Changed
 - Full spell is now displayed in the action bar when casting, instead of just the last word.
 - Microphone capture has been revamped. It now supports a bigger variety of devices, and sends user friendly messages to chat in case anything goes wrong, with hints for resolving it.
