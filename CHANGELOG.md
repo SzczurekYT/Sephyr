@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extended wind beam spell's (`alɪˈvɑn ˈdɪrɛka ɛkɐsuɾɯ`) beam is now bigger by 2 blocks
 - Full spell is now displayed in the action bar when casting, instead of just the last word.
 - Microphone capture has been revamped. It now supports a bigger variety of devices, and sends user friendly messages to chat in case anything goes wrong, with hints for resolving it.
- 
+### Fixed
+- Wind beam sound not playing
+
 ## [0.2.2-alpha] - 2026-11-05
 
 ### Changed
