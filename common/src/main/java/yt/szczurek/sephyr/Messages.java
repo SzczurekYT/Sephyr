@@ -111,11 +111,13 @@ public final class Messages {
     }
 
     public static Component micSwitchedToDefault(String microphoneName) {
-        return Component.translatable(MIC_OUTCOME_SWITCHED_DEFAULT, microphoneName);
+        return Component.translatable(MIC_OUTCOME_SWITCHED_DEFAULT, microphoneName)
+                .withStyle(ChatFormatting.WHITE);
     }
 
     public static Component micSelectSuccess(String microphoneName) {
-        return Component.translatable(MIC_SUCCESS_SELECTED, microphoneName);
+        return Component.translatable(MIC_SUCCESS_SELECTED, microphoneName)
+                .withStyle(ChatFormatting.WHITE);
     }
 
     public static Component micAlreadySelected(String microphoneName) {
