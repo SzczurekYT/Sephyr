@@ -9,6 +9,7 @@ import com.lowdragmc.photon.client.gameobject.EmptyFXObject;
 import com.lowdragmc.photon.client.gameobject.FXInstanceObject;
 import com.lowdragmc.photon.client.gameobject.IFXObject;
 import com.lowdragmc.photon.client.gameobject.emitter.data.number.Constant;
+import com.lowdragmc.photon.client.gameobject.emitter.data.number.NumberFunction;
 import com.lowdragmc.photon.client.gameobject.emitter.data.number.NumberFunction3;
 import com.lowdragmc.photon.client.gameobject.emitter.particle.ParticleEmitter;
 import com.mojang.brigadier.Command;
@@ -41,10 +42,11 @@ public class WindBeamSpell extends Spell {
     public static final float BOX_DEPTH = 24.0f;
     public static final float BOX_DEPTH_EXPANDED = 12.0f;
     public static final float BOX_DIAMETER = 1.0f;
-    public static final float BOX_DIAMETER_EXPANDED = 3.0f;
+    public static final float BOX_DIAMETER_EXPANDED = 5.0f;
     public static final float FORCE_STRENGTH = 0.4f;
     public static final float FORCE_STRENGTH_EXPANDED = 0.2f;
     public static final int DURATION_TICKS = 7 * 20 + 10; // 7.5s
+    public static final int EXPANDED_EMISSION_RATE_MULTIPLIER = 4;
     private static final Predicate<Entity> EFFECT_PREDICATE = EntitySelector.NO_SPECTATORS.and(EntitySelector.ENTITY_STILL_ALIVE);
 
     private RotatedBox box;
@@ -132,6 +134,18 @@ public class WindBeamSpell extends Spell {
         var values = emitter.runtime();
         values.duration.set(DURATION_TICKS);
 
+        boolean expanded = isExpanded();
+
+        NumberFunction oldEmissionRate = values.emission.emissionRate.get();
+        if (!(oldEmissionRate instanceof Constant oldEmissionRateConstant)) {
+            return;
+        }
+        int newEmissionRate = oldEmissionRateConstant.getNumber().intValue();
+        if (expanded) {
+            newEmissionRate *= EXPANDED_EMISSION_RATE_MULTIPLIER;
+        }
+        values.emission.emissionRate.set(NumberFunction.constant(newEmissionRate));
+
         Constant diameter = new Constant(box.diameter());
         Constant depth = new Constant(box.depth());
         emitter.updateRotation(new Vector3f(0f, reverse ? (float) Math.PI : 0f, 0f));
@@ -151,11 +165,12 @@ public class WindBeamSpell extends Spell {
         if (!(magicCircle instanceof FXInstanceObject)) {
             return;
         }
-        boolean expanded = isExpanded();
+
         Transform transform = magicCircle.transform();
         Vector3f localPos = transform.localPosition();
-        transform.localPosition(new Vector3f(localPos.x, expanded ? -0.1f : -0.2f, localPos.z));
-        transform.localScale(new Vector3f(expanded ? 2.0f : 1.0f, expanded ? 2.0f : 1.0f, 1.0f));
+        transform.localPosition(new Vector3f(1.0f, expanded ? -0.45f : -0.25f, localPos.z));
+        float scale = expanded ? 3.0f : 1.25f;
+        transform.localScale(new Vector3f(scale));
     }
 
     public static @NotNull CommandNode<SpellCtx> buildNode() {
