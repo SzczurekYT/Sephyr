@@ -7,8 +7,11 @@ import net.minecraft.network.chat.MutableComponent;
 import org.jspecify.annotations.NonNull;
 import yt.szczurek.sephyr.SeppleManager.SeppleLoadState;
 import yt.szczurek.sephyr.client.SephyrClientConfig;
+import yt.szczurek.sephyr.spell.SpellElement;
 import yt.szczurek.sepple.MicError;
 import yt.szczurek.sepple.Microphone;
+
+import java.util.List;
 
 public final class Messages {
 
@@ -79,6 +82,8 @@ public final class Messages {
     public static final MutableComponent FAILED_TOAST_TITLE = Component.translatable(TOAST_FAILED_TITLE);
     public static final MutableComponent FAILED_TOAST_MESSAGE = Component.translatable(TOAST_FAILED_MESSAGE);
     public static final MutableComponent DOWNLOAD_TOAST_TITLE = Component.translatable(TOAST_DOWNLOAD_TITLE);
+
+    private static final Component STAR_COMPONENT = Component.literal("✨").withColor(16773205); // 0xfff055
 
     private Messages() {
     }
@@ -278,5 +283,14 @@ public final class Messages {
 
     public static Component downloadProgressUnknown(long downloadedMb) {
         return Component.translatable(TOAST_DOWNLOAD_PROGRESS_UNKNOWN, downloadedMb);
+    }
+
+    public static Component actionBarSpell(List<String> words) {
+        var spellComponent = Component.literal(" " + String.join(" ", words) + " ");
+
+        var element = SpellElement.byWord(words.getFirst());
+        spellComponent.withColor(element != null ? element.color() : 0xFFFFFF);
+
+        return STAR_COMPONENT.copy().append(spellComponent).append(STAR_COMPONENT);
     }
 }

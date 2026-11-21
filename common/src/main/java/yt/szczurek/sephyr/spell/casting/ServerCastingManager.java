@@ -1,21 +1,18 @@
 package yt.szczurek.sephyr.spell.casting;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import yt.szczurek.sephyr.registry.SephyrSounds;
+import yt.szczurek.sephyr.Messages;
 import yt.szczurek.sephyr.SpellCastAttemptResult;
 import yt.szczurek.sephyr.attachment.CastWords;
+import yt.szczurek.sephyr.registry.SephyrSounds;
 import yt.szczurek.sephyr.registry.SephyrSpells;
-import yt.szczurek.sephyr.spell.SpellElement;
 import yt.szczurek.sephyr.spell.Words;
 
 import java.util.List;
 
 public class ServerCastingManager {
-    private static final Component STAR_COMPONENT = Component.literal("✨").withColor(16773205); // 0xfff055
     public static void addWord(Entity entity, String word) {
         if (word.equals(Words.DEBUG)) {
             CastWords.clear(entity);
@@ -34,13 +31,7 @@ public class ServerCastingManager {
         }
 
         if (entity instanceof Player player) {
-            var spellComponent = Component.literal(" " + String.join(" ", words) + " ");
-
-            var element = SpellElement.byWord(words.getFirst());
-            spellComponent.withColor(element != null ? element.color() : 0xFFFFFF);
-
-            var message = STAR_COMPONENT.copy().append(spellComponent).append(STAR_COMPONENT);
-            player.sendOverlayMessage(message);
+            player.sendOverlayMessage(Messages.actionBarSpell(words));
         }
 
         SpellCastAttemptResult result = SephyrSpells.tryExecute(words, entity, false);
