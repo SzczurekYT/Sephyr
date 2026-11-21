@@ -4,13 +4,13 @@ import net.jpountz.lz4.LZ4FrameInputStream;
 import org.astonbitecode.j4rs.api.Instance;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -58,7 +58,7 @@ public class SeppleBinding {
     private static void loadLibrary() {
         try (final InputStream is = SeppleBinding.class.getResourceAsStream("/natives/" + LIB_NAME + "/" + LIB_ZIP_NAME)) {
             if (is == null) {
-                throw new FileNotFoundException(LIB_ZIP_NAME);
+                throw new RuntimeException("Failed to find sepple natives " + NATIVE_NAME + " in  (jar)/natives/" + LIB_NAME + "/" + LIB_ZIP_NAME);
             }
 
             if (!Files.exists(NATIVE_DIR)) {
@@ -84,7 +84,7 @@ public class SeppleBinding {
 
                 throw new FileNotFoundException(NATIVE_NAME);
             }
-        } catch (final Throwable t) {
+        } catch (final IOException | UnsatisfiedLinkError t) {
             throw new RuntimeException("Failed to load sepple native library " + NATIVE_NAME + " from " + NATIVE_DIR, t);
         }
     }
