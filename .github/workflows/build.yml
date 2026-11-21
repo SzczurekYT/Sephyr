@@ -198,7 +198,7 @@ jobs:
           workflow_conclusion: success
           name: sepple_java_binaries.zip.l4z
           path: sepple/java/src/main/resources/natives/sepple_java
-        continue-on-error: true  
+          check_artifacts: true
 
       - name: List natives zip
         run: ls -lh sepple/java/src/main/resources/natives/sepple_java
